@@ -19,6 +19,8 @@ skills/
    ├─ continue/                      # Continue.dev rules
    ├─ windsurf/                      # Windsurf rules
    ├─ cline/                         # Cline / Roo Code instructions
+   ├─ codex/                         # OpenAI Codex CLI AGENTS.md
+   ├─ gemini-cli/                    # Google Gemini CLI GEMINI.md
    ├─ plain/                         # Pure Markdown (ChatGPT/Gemini/DeepSeek/…)
    └─ system-prompt/                 # Universal system prompt
 ```
@@ -50,6 +52,8 @@ Regenerate `dist/` after editing the source:
 | **GitHub Copilot** | `.github/copilot-instructions.md` | `dist/copilot/copilot-instructions.md` |
 | **Continue.dev** | `.continue/rules/harmonyos.md` | `dist/continue/harmonyos.md` |
 | **Cline / Roo Code** | Custom Instructions field | `dist/cline/custom-instructions.md` |
+| **OpenAI Codex CLI** | `AGENTS.md` (repo root) or `~/.codex/AGENTS.md` | `dist/codex/AGENTS.md` |
+| **Google Gemini CLI** | `GEMINI.md` (repo root) or `~/.gemini/GEMINI.md` | `dist/gemini-cli/GEMINI.md` |
 
 ### ✅ Generic (paste as system prompt / custom instructions)
 
@@ -97,6 +101,32 @@ curl -o .github/copilot-instructions.md \
 ```bash
 curl -o .windsurfrules \
   https://raw.githubusercontent.com/DengShiyingA/skills/claude/liquid-glass-skills-guide-0xUpZ/dist/windsurf/.windsurfrules
+```
+
+### OpenAI Codex CLI
+
+```bash
+# Project-level:
+curl -o AGENTS.md \
+  https://raw.githubusercontent.com/DengShiyingA/skills/claude/liquid-glass-skills-guide-0xUpZ/dist/codex/AGENTS.md
+
+# Global (user-level):
+mkdir -p ~/.codex
+curl -o ~/.codex/AGENTS.md \
+  https://raw.githubusercontent.com/DengShiyingA/skills/claude/liquid-glass-skills-guide-0xUpZ/dist/codex/AGENTS.md
+```
+
+### Google Gemini CLI
+
+```bash
+# Project-level:
+curl -o GEMINI.md \
+  https://raw.githubusercontent.com/DengShiyingA/skills/claude/liquid-glass-skills-guide-0xUpZ/dist/gemini-cli/GEMINI.md
+
+# Global (user-level):
+mkdir -p ~/.gemini
+curl -o ~/.gemini/GEMINI.md \
+  https://raw.githubusercontent.com/DengShiyingA/skills/claude/liquid-glass-skills-guide-0xUpZ/dist/gemini-cli/GEMINI.md
 ```
 
 ### ChatGPT / Gemini / DeepSeek / Qwen (manual)

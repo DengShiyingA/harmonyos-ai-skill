@@ -27,6 +27,8 @@ mkdir -p \
   "$DIST/continue" \
   "$DIST/windsurf" \
   "$DIST/cline" \
+  "$DIST/codex" \
+  "$DIST/gemini-cli" \
   "$DIST/system-prompt"
 
 # 1. Claude Code native (original format, for reference / direct copy)
@@ -67,7 +69,13 @@ printf '%s\n' "$BODY" > "$DIST/windsurf/.windsurfrules"
 # 8. Cline / Roo Code custom instructions
 printf '%s\n' "$BODY" > "$DIST/cline/custom-instructions.md"
 
-# 9. Universal system prompt (prepend role framing)
+# 9. OpenAI Codex CLI (reads AGENTS.md at repo root; also used by other AGENTS.md-aware tools)
+printf '%s\n' "$BODY" > "$DIST/codex/AGENTS.md"
+
+# 10. Google Gemini CLI (reads GEMINI.md at repo root or ~/.gemini/GEMINI.md globally)
+printf '%s\n' "$BODY" > "$DIST/gemini-cli/GEMINI.md"
+
+# 11. Universal system prompt (prepend role framing)
 {
   echo "You are an expert HarmonyOS NEXT developer. Apply the following domain knowledge when answering HarmonyOS / ArkTS / ArkUI questions."
   echo
