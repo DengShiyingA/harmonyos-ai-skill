@@ -1,6 +1,8 @@
 # Skills
 
-Claude Code skills for specialized domains. Each subdirectory is a self-contained skill with a `SKILL.md` describing when and how Claude should apply it.
+Claude Code knowledge skills for HarmonyOS (鸿蒙) native development. Each subdirectory is a self-contained skill with a `SKILL.md` that teaches Claude when and how to apply domain expertise — making it a more competent HarmonyOS engineer in chat.
+
+Currently focused on **HarmonyOS NEXT** native app development with **ArkTS** and **ArkUI** (Stage model, Kits, samples catalog). Skills are model-invoked: Claude auto-loads them whenever your question matches.
 
 ## Available skills
 
