@@ -2,6 +2,12 @@
 
 A portable knowledge pack that turns any AI coding assistant into a competent **HarmonyOS (鸿蒙) NEXT** engineer. Write the knowledge once — [`harmonyos-development/SKILL.md`](./harmonyos-development/SKILL.md) — and install it into every major AI coding tool via pre-built drop-in files.
 
+> **简介(中文)**:这是一个"把鸿蒙开发知识喂给 AI"的工具箱。只维护一份 Markdown 源文件,通过构建脚本自动产出 Claude Code / Cursor / Copilot / Codex / Gemini CLI / Windsurf / Continue / Cline / ChatGPT / DeepSeek / Qwen / Ollama 等 11 种工具的配置文件,让每个 AI 助手都能像一个熟读 HarmonyOS 文档的工程师一样帮你写 ArkTS / ArkUI 代码。安装方式见下方对应工具的章节。
+
+**What is a "skill"?** A skill is a chunk of domain knowledge (in Markdown) that an AI coding tool loads as background context when you chat with it. Once installed, the AI "knows" the domain — it will give you HarmonyOS-correct answers instead of generic TypeScript / React advice. Different tools call them different things (skills, rules, instructions, system prompt), but they all work the same way: **extra text prepended to the model's context**.
+
+**Requirements:** `git` and `curl` (or just copy-paste for web tools). No other dependencies.
+
 ## What's inside the knowledge
 
 The skill teaches the AI everything needed to read, write, review, and debug HarmonyOS NEXT native apps:
@@ -26,7 +32,7 @@ The skill teaches the AI everything needed to read, write, review, and debug Har
 | Tool | Install path | How it activates |
 |---|---|---|
 | **Claude Code CLI** | `~/.claude/skills/harmonyos-development/` | Claude reads `SKILL.md` frontmatter `description` and auto-loads when your question mentions HarmonyOS / ArkTS / ArkUI / Stage model / etc. Zero manual invocation. |
-| **Claude Agent SDK** | passed through `skills` option | Same as Claude Code — description-based auto-loading. |
+| **Claude Agent SDK** | Put the `harmonyos-development/` folder anywhere, point the SDK at it via the `skills` parameter when constructing the agent | Same as Claude Code — description-based auto-loading. |
 
 ### 2. Project rules file (auto-attached to every session inside the project)
 
@@ -57,31 +63,34 @@ The two files differ only slightly: `plain/` is the raw Markdown; `system-prompt
 
 ## Installation — detailed instructions per tool
 
-All commands assume this environment variable (paste it in your terminal first):
+All `curl` commands below use a shell variable `$RAW` — run this once in your terminal first (it stays set for the rest of your session):
 
 ```bash
-RAW=https://raw.githubusercontent.com/DengShiyingA/skills/claude/liquid-glass-skills-guide-0xUpZ
+export RAW=https://raw.githubusercontent.com/DengShiyingA/skills/claude/liquid-glass-skills-guide-0xUpZ
 ```
 
 ### Claude Code CLI
 
-```bash
-# Option A — clone once, copy
-git clone https://github.com/DengShiyingA/skills.git
-mkdir -p ~/.claude/skills
-cp -r skills/harmonyos-development ~/.claude/skills/
+Pick **one** of the three options below:
 
-# Option B — symlink to track upstream updates
+```bash
+# Option A — quick copy (you get a static snapshot)
+git clone https://github.com/DengShiyingA/skills.git ~/src/ds-skills
+mkdir -p ~/.claude/skills
+cp -r ~/src/ds-skills/harmonyos-development ~/.claude/skills/
+
+# Option B — symlink (recommended: auto-updates after `git pull`)
 git clone https://github.com/DengShiyingA/skills.git ~/src/ds-skills
 mkdir -p ~/.claude/skills
 ln -s ~/src/ds-skills/harmonyos-development ~/.claude/skills/harmonyos-development
 
-# Option C — project-local only (share with your team via git)
+# Option C — project-local only (commit it so your whole team gets the skill)
+cd <your-harmonyos-project>
 mkdir -p .claude/skills
 cp -r ~/src/ds-skills/harmonyos-development .claude/skills/
 ```
 
-Then **restart Claude Code**. Verify by asking: *"What skills are available?"*
+After installing, **restart Claude Code**. To verify, ask it: *"What skills are available?"* — it should list `harmonyos-development`.
 
 ### Cursor
 
@@ -177,14 +186,22 @@ ollama run qwen2.5-coder:14b \
 
 Or bake it into a custom Modelfile:
 
-```dockerfile
+```bash
+# 1. Download the system prompt
+curl -o system.txt "$RAW/dist/system-prompt/system.txt"
+
+# 2. Create a Modelfile (replace the SYSTEM block contents with the file you just downloaded)
+cat > Modelfile <<EOF
 FROM qwen2.5-coder:14b
 SYSTEM """
-$(contents of dist/system-prompt/system.txt)
+$(cat system.txt)
 """
-```
+EOF
 
-Then `ollama create harmonyos-coder -f Modelfile`.
+# 3. Register the custom model
+ollama create harmonyos-coder -f Modelfile
+ollama run harmonyos-coder
+```
 
 ### Anthropic / OpenAI / any LLM API
 
@@ -212,8 +229,7 @@ response = client.messages.create(
 |---|---|---|
 | **Claude Code / Agent SDK** | LLM reads skill `description` and decides whether to load for this turn | No — on-demand, saves context |
 | **Cursor `.mdc`** | Glob pattern matches current file | Scoped to `.ets` / HarmonyOS config files |
-| **Cursor `.cursorrules`, `.cursorrules`, `.windsurfrules`, Copilot instructions, AGENTS.md, GEMINI.md** | Always prepended to every turn inside the project | Yes |
-| **Continue / Cline rules** | Always prepended | Yes |
+| **Cursor `.cursorrules`, `.windsurfrules`, Copilot instructions, AGENTS.md, GEMINI.md, Continue / Cline rules** | Always prepended to every turn inside the project | Yes |
 | **ChatGPT / Gemini Custom Instructions** | Always prepended to every conversation for that account | Yes |
 | **Per-conversation paste / API `system`** | Only the conversations where you paste | Per-call |
 
@@ -324,6 +340,33 @@ After editing the source file, run `./scripts/build-dist.sh` to regenerate every
 
 ---
 
+## Troubleshooting
+
+**The AI still gives generic TypeScript/React answers.**
+- Confirm the file landed in the right path (see table in *Supported AI tools*).
+- For Claude Code, run *"What skills are available?"* — if `harmonyos-development` isn't listed, restart Claude Code or check `~/.claude/skills/` directly.
+- For project-rule tools (Cursor, Copilot, etc.), make sure you're editing files **inside the repo** where the rule file lives. Rules don't apply outside the repo.
+- For paste-based tools (ChatGPT, DeepSeek, …), the system prompt is per-conversation; start a **new chat** after pasting.
+
+**Rule file is too long for the tool's context limit.**
+Unlikely — `SKILL.md` is ~370 lines (~12 KB). Every listed tool accepts it. If you still hit a limit, trim sections from `dist/plain/harmonyos-knowledge.md` manually.
+
+**`curl` fails with 404.**
+The branch in the URL may have moved. Check `https://github.com/DengShiyingA/skills/branches` and update `$RAW` accordingly.
+
+**How do I update after the upstream repo changes?**
+See the *Updating to the latest version* section above.
+
+---
+
 ## License & contributing
 
-Contributions welcome. Open a PR against `harmonyos-development/SKILL.md` with your additions/corrections, then run `./scripts/build-dist.sh` and commit the regenerated `dist/`.
+Licensed under the **MIT License** — use it freely in personal and commercial projects.
+
+Contributions welcome:
+1. Fork the repo
+2. Edit `harmonyos-development/SKILL.md` (the **only** file you should ever edit — `dist/` is generated)
+3. Run `./scripts/build-dist.sh` to regenerate distribution files
+4. Commit both the source and the regenerated `dist/`, then open a PR
+
+Factual corrections, new gotchas, updated API names, and translations of the description field (for better trigger matching) are all welcome.
