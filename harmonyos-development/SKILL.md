@@ -317,6 +317,151 @@ Image($r('app.media.photo')).geometryTransition('picture')
 this.getUIContext()?.animateTo({ duration: 300 }, () => { this.isExpanded = !this.isExpanded })
 ```
 
+### Tabs — bottom/top navigation
+
+```ts
+@Entry @Component
+struct MainPage {
+  @State currentIndex: number = 0;
+
+  @Builder tabBuilder(index: number, title: string, icon: Resource) {
+    Column() {
+      SymbolGlyph(icon).fontSize(24)
+        .fontColor([this.currentIndex === index ? '#007DFF' : '#99000000'])
+      Text(title).fontSize(10).margin({ top: 4 })
+        .fontColor(this.currentIndex === index ? '#007DFF' : '#99000000')
+    }.justifyContent(FlexAlign.Center).height('100%').width('100%')
+  }
+
+  build() {
+    Tabs({ barPosition: BarPosition.End }) {        // BarPosition.Start for top
+      TabContent() { HomePage() }
+        .tabBar(this.tabBuilder(0, 'Home', $r('sys.symbol.house')))
+      TabContent() { MinePage() }
+        .tabBar(this.tabBuilder(1, 'Me', $r('sys.symbol.person')))
+    }
+    .barHeight(56)
+    .onChange((index) => { this.currentIndex = index; })
+    .scrollable(false)                               // disable swipe between tabs
+  }
+}
+```
+
+Glass-blur tab bar: `.barOverlap(true).barBackgroundBlurStyle(BlurStyle.Thin)`.
+
+### Swiper — carousel / banner
+
+```ts
+Swiper() {
+  ForEach(this.banners, (item: BannerItem) => {
+    Image(item.url).width('100%').height(180).borderRadius(12)
+  })
+}
+.loop(true)
+.autoPlay(true)
+.interval(3000)
+.indicator(new DotIndicator()
+  .color('#33000000').selectedColor('#007DFF')
+  .itemWidth(8).selectedItemWidth(16))
+```
+
+### WaterFlow — Pinterest-style layout
+
+```ts
+WaterFlow({ scroller: this.scroller }) {
+  LazyForEach(this.dataSource, (item: CardItem) => {
+    FlowItem() {
+      Column() {
+        Image(item.image).width('100%').borderRadius(8)
+        Text(item.title).fontSize(14).padding(8)
+      }
+    }
+  }, (item: CardItem) => item.id)
+}
+.columnsTemplate('1fr 1fr')       // 2 columns
+.columnsGap(8)
+.rowsGap(8)
+.cachedCount(10)
+```
+
+### Grid — fixed grid layout
+
+```ts
+Grid() {
+  ForEach(this.items, (item: GridItemData) => {
+    GridItem() {
+      Column() {
+        Image(item.icon).width(40).height(40)
+        Text(item.name).fontSize(12).margin({ top: 4 })
+      }
+    }
+  })
+}
+.columnsTemplate('1fr 1fr 1fr 1fr')   // 4 columns
+.rowsGap(12)
+.columnsGap(12)
+.height(200)
+```
+
+### TextInput / TextArea
+
+```ts
+TextInput({ placeholder: 'Enter username' })
+  .type(InputType.Normal)                          // .Email, .Number, .Password, .PhoneNumber
+  .maxLength(20)
+  .onChange((value: string) => { this.username = value; })
+  .onSubmit((enterKey: EnterKeyType) => { /* handle submit */ })
+
+TextArea({ placeholder: 'Enter description', text: $$this.desc })
+  .maxLength(200)
+  .showCounter(true)                                // character count indicator
+```
+
+Two-way binding with `$$`: `TextInput({ text: $$this.value })` — no `onChange` needed.
+
+### Router — basic page navigation
+
+```ts
+import { router } from '@kit.ArkUI';
+
+// Push to new page (with params)
+router.pushUrl({
+  url: 'pages/Detail',
+  params: { id: '123', title: 'Hello' }
+});
+
+// Get params on target page
+const params = router.getParams() as Record<string, string>;
+
+// Go back
+router.back();
+
+// Replace current page (no back stack)
+router.replaceUrl({ url: 'pages/Login' });
+```
+
+> **Note**: For Navigation-based apps, prefer `NavPathStack.pushPath()` over Router.
+
+### AlertDialog / Toast
+
+```ts
+// Alert dialog
+AlertDialog.show({
+  title: 'Confirm',
+  message: 'Delete this item?',
+  primaryButton: { value: 'Cancel', action: () => {} },
+  secondaryButton: { value: 'Delete', fontColor: Color.Red,
+    action: () => { this.deleteItem(); }
+  },
+});
+
+// Toast
+this.getUIContext().getPromptAction().showToast({
+  message: 'Operation successful',
+  duration: 2000,
+});
+```
+
 ### HarmonyOS 6.0 visual effects (沉浸光感视效 / 液态玻璃)
 
 HarmonyOS 6.0 (API 23) introduces system-level "Immersive Light Perception" visual effects. Users enable via Settings → Desktop & Personalization → Immersive Light Effect (强/均衡/弱). Developers achieve similar effects through these ArkUI attributes:
