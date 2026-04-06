@@ -2254,13 +2254,103 @@ Supports generating: QR Code, EAN-8, EAN-13, UPC-A, UPC-E, Codabar, Code 39/93/1
 
 Retrieves phone number + UnionID in a single tap. Requires manual signing + AGC permission approval.
 
+```ts
+import { authentication } from '@kit.AccountKit';
+import { util } from '@kit.ArkTS';
+
+// Step 1: Get anonymous phone number (for display on login page)
+const authRequest = new authentication.HuaweiIDProvider().createAuthorizationWithHuaweiIDRequest();
+authRequest.scopes = ['quickLoginAnonymousPhone'];
+authRequest.state = util.generateRandomUUID();
+authRequest.forceAuthorization = false;  // must be false for one-click login
+
+const controller = new authentication.AuthenticationController();
+const response = await controller.executeRequest(authRequest);
+const anonymousPhone = response.data?.extraInfo?.quickLoginAnonymousPhone as string;
+// Display anonymousPhone on login page, e.g. "188****1234"
+```
+
+```ts
+// Step 2: Show LoginWithHuaweiIDButton — user taps to get Authorization Code
+import { loginComponentManager, LoginWithHuaweiIDButton } from '@kit.AccountKit';
+
+LoginWithHuaweiIDButton({
+  params: {
+    style: loginComponentManager.Style.BUTTON_RED,
+    borderRadius: 24,
+    loginType: loginComponentManager.LoginType.QUICK_LOGIN,  // one-click login
+    supportDarkMode: true
+  },
+  controller: this.controller  // LoginWithHuaweiIDButtonController
+})
+
+// In controller callback: response.authorizationCode → send to server
+// Server calls /oauth2/v6/quickLogin/getPhoneNumber to get full phone + UnionID
+```
+
+**Obfuscation whitelist** — if property obfuscation is enabled, add to `obfuscation-rules.txt`:
+```
+-keep-property-name
+quickLoginAnonymousPhone
+```
+
 ### Huawei Account login (all developers)
 
-Retrieves UnionID/OpenID. Supports both enterprise and individual developers.
+Retrieves UnionID/OpenID via `LoginWithHuaweiIDButton` or API. Supports enterprise + individual developers.
+
+```ts
+// Using LoginWithHuaweiIDButton component (recommended)
+LoginWithHuaweiIDButton({
+  params: {
+    style: loginComponentManager.Style.BUTTON_RED,
+    borderRadius: 24,
+    loginType: loginComponentManager.LoginType.ID,  // standard login
+    supportDarkMode: true
+  },
+  controller: this.controller
+})
+// callback returns authorizationCode → server exchanges for UnionID/OpenID
+```
+
+```ts
+// Using custom button with API
+import { authentication } from '@kit.AccountKit';
+
+const loginRequest = new authentication.HuaweiIDProvider().createLoginWithHuaweiIDRequest();
+loginRequest.forceLogin = true;  // true = show login page if not logged in
+loginRequest.state = util.generateRandomUUID();
+
+const controller = new authentication.AuthenticationController(getContext(this));
+const response = await controller.executeRequest(loginRequest);
+const authCode = response.data?.authorizationCode;
+// Send authCode to server → server gets UnionID/OpenID via Access Token
+```
 
 ### Silent login
 
-No user interaction needed — retrieves UnionID for returning users (reinstall, device switch).
+No user interaction — retrieves UnionID for returning users (reinstall, device switch).
+
+```ts
+const loginRequest = new authentication.HuaweiIDProvider().createLoginWithHuaweiIDRequest();
+loginRequest.forceLogin = false;  // false = silent, no UI if not logged in
+loginRequest.state = util.generateRandomUUID();
+
+const controller = new authentication.AuthenticationController();
+const response = await controller.executeRequest(loginRequest);
+const authCode = response.data?.authorizationCode;
+// If error.code === 1001502001 → user not logged in, show other login methods
+```
+
+### Common error codes
+
+| Code | Meaning | Action |
+|---|---|---|
+| `1001502001` | Huawei Account not logged in | Show other login methods |
+| `1001502005` | Network error | Retry or show other methods |
+| `1001502012` | User cancelled | No action needed |
+| `1001500001` | Certificate fingerprint check failed | Check signing config |
+| `1001502014` | Missing scopes/permissions | Check AGC permission approval |
+| `1005300001` | User did not agree to protocol | Show agreement dialog |
 
 ### Key concepts
 
