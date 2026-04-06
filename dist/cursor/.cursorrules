@@ -330,6 +330,17 @@ Image($r('app.media.photo')).geometryTransition('picture')
 this.getUIContext()?.animateTo({ duration: 300 }, () => { this.isExpanded = !this.isExpanded })
 ```
 
+**Keyframe animation (`keyframeAnimateTo`)** — multi-step sequences:
+```ts
+this.getUIContext()?.keyframeAnimateTo({ iterations: 2 }, [
+  { duration: 100, event: () => { this.translateX = 10; } },
+  { duration: 100, event: () => { this.translateX = -10; } },
+  { duration: 100, event: () => { this.translateX = 0; } },
+]);
+```
+
+**Animation performance tips:** Prefer transform properties (`scale`/`translate`/`rotate`/`opacity`) over layout properties (`width`/`height`/`margin`) — transforms skip re-layout.
+
 ### Tabs — bottom/top navigation
 
 ```ts
@@ -1147,6 +1158,24 @@ function isTablet(): boolean {
 11. **Navigation has no `hideSideBar`** — use `.hideBackButton(true)` instead.
 12. **`promptAction.showToast()` is deprecated** — use `getUIContext().getPromptAction().showToast(...)` instead; wrap in try-catch for safety.
 13. **Floating FAB button blocks last list item** — use `Navigation.menus()` for primary action buttons, or add bottom padding to List equal to FAB height + margin.
+14. **Named callbacks for `on/off`** — anonymous functions can't be unregistered. Always store references:
+    ```ts
+    // BAD: can't off() an anonymous function
+    session.on('stateChange', (state) => { ... });
+    // GOOD: named reference
+    const cb = (state: StateType) => { ... };
+    session.on('stateChange', cb);
+    session.off('stateChange', cb);
+    ```
+15. **Batch state mutations** — multiple `@State` changes trigger multiple re-renders. Accumulate in a temp variable, assign once:
+    ```ts
+    // BAD: 3 re-renders
+    this.list.push(a); this.list.push(b); this.list.push(c);
+    // GOOD: 1 re-render
+    const tmp = [...this.list, a, b, c];
+    this.list = tmp;
+    ```
+16. **State decorator selection priority** — `@State+@Prop/@Link/@ObjectLink` (parent-child) > `@Provide+@Consume` (deep nesting) > `LocalStorage` (page-level) > `AppStorage` (global). Avoid `AppStorage` for frequently-changing data.
 
 ## Stability — crash types and error handling
 
@@ -1259,6 +1288,21 @@ if (result.authResults[0] === 0) {
 ```
 
 **Data encryption levels:** EL1 (device-level) → EL2 (user-level, default) → EL3 (accessible while locked) → EL4 (inaccessible when locked)
+
+**Network security config** — HTTPS/certificate pinning for production apps:
+
+Create `src/main/resources/base/profile/network_config.json`:
+```json
+{
+  "network-security-config": {
+    "domain-config": [{
+      "domains": [{ "include-subdomains": true, "name": "api.example.com" }],
+      "trust-anchors": [{ "certificates": "/data/storage/el1/bundle/entry/resources/resfile/ca_cert.pem" }]
+    }]
+  }
+}
+```
+Reference in `module.json5`: `"metadata": [{ "name": "NetworkSecurityConfig", "resource": "$profile:network_config" }]`.
 
 ## Testing — arkxtest framework
 
@@ -3766,4 +3810,37 @@ scroller.scrollToIndex(this.messages.length - 1);
 ```ts
 List() { LazyForEach(this.dataSource, ...) }
   .maintainVisibleContentPosition(true)   // new items at top don't shift visible content
+```
+
+### ListItemGroup + sticky header (grouped list)
+
+```ts
+@Builder sectionHeader(title: string) {
+  Text(title).fontSize(14).fontColor('#99000000')
+    .width('100%').padding({ left: 16, top: 8, bottom: 8 })
+    .backgroundColor('#F1F3F5')
+}
+
+List() {
+  ForEach(this.groups, (group: GroupData) => {
+    ListItemGroup({ header: this.sectionHeader(group.title) }) {
+      ForEach(group.items, (item: ItemData) => {
+        ListItem() { Text(item.name) }
+      })
+    }
+  })
+}
+.sticky(StickyStyle.Header)         // header sticks to top when scrolling
+```
+
+### onReachEnd — load more data
+
+```ts
+List() { LazyForEach(this.dataSource, ...) }
+  .onReachEnd(() => {
+    if (!this.isLoading) {
+      this.isLoading = true;
+      this.loadNextPage().then(() => { this.isLoading = false; });
+    }
+  })
 ```
