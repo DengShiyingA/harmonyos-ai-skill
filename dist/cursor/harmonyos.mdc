@@ -840,9 +840,9 @@ SymbolGlyph($r('sys.symbol.bell_fill'))
   .symbolEffect(new BounceSymbolEffect(EffectScope.WHOLE), true)
 ```
 
-**Confirmed working names** (SDK 6.0.1): `xmark` · `plus` · `minus` · `checkmark` · `chevron_right` · `chevron_left` · `star` · `star_fill` · `bell` · `bell_fill` · `doc` · `video` · `mic` · `mic_fill` · `clock` · `trash` · `pencil` · `image` · `person`
+**Confirmed working names** (SDK 6.0.1): `xmark` · `plus` · `minus` · `checkmark` · `chevron_right` · `chevron_left` · `star` · `star_fill` · `bell` · `bell_fill` · `doc` · `video` · `mic` · `mic_fill` · `clock` · `trash` · `pencil` · `camera` · `person`
 
-**Names that do NOT exist** (common mistakes): `photo` · `doc_richtext` · `sparkles` · `checklist`
+**Names that do NOT exist** (common mistakes): `photo` · `doc_richtext` · `sparkles` · `checklist` · `image` (use `doc` or `camera` instead) · `location_fill` (use text label instead)
 
 Find valid names: https://developer.huawei.com/consumer/cn/design/harmonyos-symbol
 
@@ -937,6 +937,9 @@ function isTablet(): boolean {
 8. **Permissions must be declared AND requested at runtime** for user-grant permissions.
 9. **ohpm** is the package manager (similar to npm) — dependencies live in `oh-package.json5`.
 10. **Preview on device** — DevEco Previewer doesn't fully simulate; always test on real HarmonyOS device or emulator.
+11. **Navigation has no `hideSideBar`** — use `.hideBackButton(true)` instead.
+12. **`promptAction.showToast()` is deprecated** — use `getUIContext().getPromptAction().showToast(...)` instead; wrap in try-catch for safety.
+13. **Floating FAB button blocks last list item** — use `Navigation.menus()` for primary action buttons, or add bottom padding to List equal to FAB height + margin.
 
 ## Stability — crash types and error handling
 
