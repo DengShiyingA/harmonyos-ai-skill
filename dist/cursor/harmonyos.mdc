@@ -813,6 +813,162 @@ function isTablet(): boolean {
 9. **ohpm** is the package manager (similar to npm) — dependencies live in `oh-package.json5`.
 10. **Preview on device** — DevEco Previewer doesn't fully simulate; always test on real HarmonyOS device or emulator.
 
+## Stability — crash types and error handling
+
+| Type | Description |
+|---|---|
+| **JS_ERROR** | ArkTS/JS runtime exceptions (most common) — `TypeError: Cannot read property 'x' of undefined` |
+| **CPP_CRASH** | Native C/C++ crash (SIGSEGV, SIGABRT) |
+| **APP_FREEZE** | Main thread blocked >6s (ANR equivalent). Root causes: thread locks (57%), system resources (14%), heavy main-thread work (9%) |
+| **OOM** | Out-of-memory kill |
+
+**Global error handler:**
+```ts
+import { errorManager } from '@kit.AbilityKit';
+
+const observer: errorManager.ErrorObserver = {
+  onUnhandledException(errMsg: string): void {
+    console.error('Uncaught: ' + errMsg);
+  },
+  onException?(errObject: Error): void {  // API 10+
+    console.error(errObject.name + ': ' + errObject.message);
+  }
+};
+const observerId = errorManager.on('error', observer);
+```
+
+**Crash event subscription (HiAppEvent):**
+```ts
+import { hiAppEvent } from '@kit.PerformanceAnalysisKit';
+
+hiAppEvent.addWatcher({
+  name: "crashWatcher",
+  appEventFilters: [{
+    domain: hiAppEvent.domain.OS,
+    names: [hiAppEvent.event.APP_CRASH]
+  }],
+  onReceive: (domain, appEventGroups) => { /* process crash */ }
+});
+```
+
+## Background Tasks — 4 types
+
+| Type | API | Duration | Use case |
+|---|---|---|---|
+| **Transient** | `requestSuspendDelay` | ~3 min max | Save data, upload logs |
+| **Continuous** | `startBackgroundRunning` | Unlimited (needs notification) | Music, navigation, recording |
+| **Deferred** | `workScheduler.startWork` | System-determined | Timed sync, cleanup |
+| **Agent Reminders** | `ReminderRequestTimer` | System-managed | Alarms, timers |
+
+**Continuous task example:**
+```ts
+import { backgroundTaskManager } from '@kit.BackgroundTasksKit';
+import { wantAgent, WantAgent } from '@kit.AbilityKit';
+
+// module.json5: "abilities": [{ "backgroundModes": ["audioRecording"] }]
+// permission: ohos.permission.KEEP_BACKGROUND_RUNNING
+
+const info: wantAgent.WantAgentInfo = {
+  wants: [{ bundleName: 'com.example.app', abilityName: 'MainAbility' }],
+  actionType: wantAgent.OperationType.START_ABILITY,
+  requestCode: 0, actionFlags: [wantAgent.WantAgentFlags.UPDATE_PRESENT_FLAG]
+};
+const agent = await wantAgent.getWantAgent(info);
+backgroundTaskManager.startBackgroundRunning(
+  this.context, backgroundTaskManager.BackgroundMode.AUDIO_RECORDING, agent
+);
+```
+
+9 background modes: `dataTransfer` · `audioPlayback` · `audioRecording` · `location` · `bluetoothInteraction` · `multiDeviceConnection` · `taskKeeping` (2-in-1 only)
+
+**Deferred task frequency by user activity:** Active=2h, Frequent=4h, Regular=24h, Rare=48h, Never used=prohibited.
+
+## Security coding rules (from official best practices)
+
+1. Set `exported: false` for non-interactive abilities
+2. Validate all parameters crossing trust boundaries (Want intents, rpc.RemoteObject)
+3. Use parameterized queries — never string concat for SQL
+4. Replace HTTP with HTTPS; validate SSL certificates
+5. Never store personal data in clipboard
+6. Use `Asset Store Kit` for sensitive short data (passwords, tokens)
+7. Avoid passing personal data through implicit intents
+8. Use code obfuscation for production builds
+9. Use precise `InputType` (`.USER_NAME`, `.Password`) for system-level protection
+10. Never use debug signatures for production releases
+
+**Permission check + request pattern:**
+```ts
+import { abilityAccessCtrl, bundleManager } from '@kit.AbilityKit';
+
+// Check
+const atManager = abilityAccessCtrl.createAtManager();
+const bundleInfo = await bundleManager.getBundleInfoForSelf(
+  bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
+const status = await atManager.checkAccessToken(
+  bundleInfo.appInfo.accessTokenId, 'ohos.permission.CAMERA');
+
+// Request (if user previously rejected, use requestPermissionOnSetting instead)
+atManager.requestPermissionsFromUser(context,
+  ['ohos.permission.CAMERA', 'ohos.permission.MICROPHONE']);
+```
+
+**Data encryption levels:** EL1 (device-level) → EL2 (user-level, default) → EL3 (accessible while locked) → EL4 (inaccessible when locked)
+
+## Testing — arkxtest framework
+
+Package: `@ohos/hypium` (Mocha-style). Three sub-frameworks: **JsUnit** (unit), **UiTest** (UI automation), **PerfTest** (performance).
+
+### JsUnit
+
+```ts
+import { describe, it, expect, beforeAll, beforeEach, afterEach, afterAll } from '@ohos/hypium';
+
+export default function abilityTest() {
+  describe('MyTestSuite', () => {
+    beforeAll(() => { /* once before all */ });
+    beforeEach(() => { /* before each */ });
+    afterEach(() => { /* after each */ });
+    afterAll(() => { /* once after all */ });
+
+    it('sync_test', 0, () => {
+      expect(1 + 1).assertEqual(2);
+    });
+
+    it('async_test', 0, async (done: Function) => {
+      let result = await someAsyncOp();
+      expect(result).assertContain('expected');
+      done();
+    });
+  });
+}
+```
+
+**Key assertions:** `assertEqual(v)` · `assertContain(v)` · `assertTrue()` · `assertFalse()` · `assertNull()` · `assertUndefined()` · `assertNaN()` · `assertInstanceOf(type)` · `assertThrowError(fn)` · `assertDeepEquals(v)` · `assertClose(v, tolerance)` · `assertLarger(v)` · `assertLess(v)` · `not()` (negation) · `assertPromiseIsResolved()` · `assertPromiseIsRejected()`
+
+### UiTest — UI automation
+
+```ts
+import { Driver, ON } from '@kit.TestKit';
+
+it('ui_test', 0, async () => {
+  let driver = Driver.create();
+
+  let btn = await driver.findComponent(ON.text('Submit'));
+  await btn.click();
+
+  let input = await driver.findComponent(ON.id('username'));
+  await input.inputText('test_user');
+
+  await driver.assertComponentExist(ON.text('Success'));
+});
+```
+
+**ON selectors:** `.text()` · `.id()` · `.type()` · `.above()` · `.below()` · `.leftOf()` · `.rightOf()`
+
+**Component actions:** `click()` · `doubleClick()` · `longClick()` · `swipe()` · `drag()` · `inputText()` · `setText()` · `keyEvent()`
+
+Test files in `entry/src/ohosTest/ets/test/`. Always `await` UiTest async APIs; component references become stale after UI changes.
+
 ## 仓颉 (Cangjie) — alternative language (Beta)
 
 | | ArkTS | Cangjie |
