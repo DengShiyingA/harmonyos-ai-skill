@@ -1194,6 +1194,9 @@ function isTablet(): boolean {
     ```
 16. **State decorator selection priority** — `@State+@Prop/@Link/@ObjectLink` (parent-child) > `@Provide+@Consume` (deep nesting) > `LocalStorage` (page-level) > `AppStorage` (global). Avoid `AppStorage` for frequently-changing data.
 
+17. **Unit conversion** — `px2vp(px)` / `vp2px(vp)` via `this.getUIContext().px2vp(value)`. Screen density: `display.getDefaultDisplaySync().densityPixels`.
+18. **Keep screen on** — `win.setWindowKeepScreenOn(true)` during video playback / navigation; reset on pause.
+
 ## Stability — crash types and error handling
 
 | Type | Description |
