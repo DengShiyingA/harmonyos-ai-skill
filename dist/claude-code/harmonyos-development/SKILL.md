@@ -11,6 +11,7 @@ description: >
   sys.symbol, HAP, HSP, relationalStore, preferences, notificationManager,
   backgroundTaskManager, abilityAccessCtrl, arkxtest, BlurStyle, systemMaterialEffect,
   CameraKit, cameraPicker, AudioRenderer, AudioKit, StreamUsage, ArkGuard, 代码混淆,
+  ScanKit, scanBarcode, customScan, AccountKit, continuable, onContinue, 应用接续, 扫码,
   鸿蒙, 鸿蒙开发, 鸿蒙NEXT, 方舟语言, 状态管理, 导航路由, 懒加载, 组件复用,
   鸿蒙权限, 鸿蒙测试, 液态玻璃, 沉浸光感, 折叠屏, 鸿蒙入门
 ---
@@ -2147,3 +2148,204 @@ class ImportantClass {
 - Always save `nameCache.json` per release — needed to decode obfuscated crash stacks
 - `-compact` removes all newlines → crash stack line numbers become useless (column info not provided in release builds)
 - String properties matching SDK API constants (e.g., `'ohos.want.action.home'`) are NOT auto-whitelisted — add them manually if used as property keys
+
+## Scan Kit — barcode scanning & generation
+
+### Default UI scan (no camera permission needed)
+
+Launches the system scan UI. Camera is pre-authorized — no permission request required.
+
+```ts
+import { scanCore, scanBarcode } from '@kit.ScanKit';
+
+const options: scanBarcode.ScanOptions = {
+  scanTypes: [scanCore.ScanType.ALL],
+  enableMultiMode: true,
+  enableAlbum: true
+};
+
+try {
+  const result = await scanBarcode.startScanForResult(
+    getContext(this),   // or this.getUIContext().getHostContext()
+    options
+  );
+  // result.originalValue — decoded string
+  // result.scanType — code type (QR, EAN-13, etc.)
+  console.info('Scan result:', result.originalValue);
+} catch (err) {
+  console.error('Scan failed:', err.code, err.message);
+}
+```
+
+Supported code types: QR Code, Data Matrix, PDF417, Aztec, EAN-8, EAN-13, UPC-A, UPC-E, Codabar, Code 39/93/128, ITF-14.
+
+### Image decode (detect barcode in photo)
+
+```ts
+import { scanCore, scanBarcode, detectBarcode } from '@kit.ScanKit';
+import { photoAccessHelper } from '@kit.MediaLibraryKit';
+
+// Pick an image from gallery
+const picker = new photoAccessHelper.PhotoViewPicker();
+const pickerResult = await picker.select({
+  MIMEType: photoAccessHelper.PhotoViewMIMETypes.IMAGE_TYPE,
+  maxSelectNumber: 1
+});
+
+// Decode barcode from selected image
+const inputImage: detectBarcode.InputImage = { uri: pickerResult.photoUris[0] };
+const results = await detectBarcode.decode(inputImage, {
+  scanTypes: [scanCore.ScanType.ALL],
+  enableMultiMode: true
+});
+// results is Array<scanBarcode.ScanResult>
+```
+
+### Custom UI scan (requires `ohos.permission.CAMERA`)
+
+Use `customScan` from `@kit.ScanKit` for full control over the scan UI:
+
+```ts
+import { scanCore, scanBarcode, customScan } from '@kit.ScanKit';
+
+// 1. Init
+customScan.init({ scanTypes: [scanCore.ScanType.ALL], enableMultiMode: true });
+
+// 2. Start with XComponent surfaceId
+const viewControl: customScan.ViewControl = { width, height, surfaceId };
+const results = await customScan.start(viewControl);
+
+// 3. Control: customScan.openFlashLight() / closeFlashLight()
+//             customScan.setZoom(2.0) / getZoom()
+//             customScan.setFocusPoint({x, y}) / resetFocus()
+//             customScan.stop() / rescan()
+
+// 4. Release when done
+await customScan.release();
+```
+
+## Account Kit — Huawei ID login
+
+### Configure Client ID in `module.json5`
+
+```json5
+{
+  "module": {
+    "name": "entry",
+    "type": "entry",
+    "metadata": [{
+      "name": "client_id",
+      "value": "YOUR_CLIENT_ID"  // from AGC console
+    }]
+  }
+}
+```
+
+### One-click login (enterprise developers, non-game apps)
+
+Retrieves phone number + UnionID in a single tap. Requires manual signing + AGC permission approval.
+
+### Huawei Account login (all developers)
+
+Retrieves UnionID/OpenID. Supports both enterprise and individual developers.
+
+### Silent login
+
+No user interaction needed — retrieves UnionID for returning users (reinstall, device switch).
+
+### Key concepts
+
+| ID type | Scope | Use case |
+|---|---|---|
+| **OpenID** | Per-app unique | Identify user within one app |
+| **UnionID** | Per-developer unique | Identify user across multiple apps by same developer |
+| **GroupUnionID** | Per-account-group unique | Identify user across affiliated developers |
+
+For cross-platform user data continuity, prefer **UnionID** over OpenID.
+
+## App continuation (应用接续) — cross-device migration
+
+Enable cross-device task handoff: migrate UIAbility state from device A to device B.
+
+### Enable continuation in `module.json5`
+
+```json5
+{
+  "module": {
+    "abilities": [{
+      "name": "EntryAbility",
+      "continuable": true   // enable cross-device migration
+    }]
+  }
+}
+```
+
+### Source device — save migration data
+
+```ts
+// In UIAbility
+onContinue(wantParam: Record<string, Object>): AbilityConstant.OnContinueResult {
+  // Save data to migrate (keep under 100KB, use distributed data object for larger data)
+  wantParam['currentPage'] = 'DetailPage';
+  wantParam['articleId'] = this.articleId;
+
+  // Check target app version compatibility
+  const targetVersion = wantParam['version'] as number;
+  if (targetVersion < 2) {
+    return AbilityConstant.OnContinueResult.MISMATCH;
+  }
+
+  return AbilityConstant.OnContinueResult.AGREE;
+}
+```
+
+### Target device — restore data
+
+```ts
+// Cold start
+onCreate(want: Want, launchParam: AbilityConstant.LaunchParam) {
+  if (launchParam.launchReason === AbilityConstant.LaunchReason.CONTINUATION) {
+    // Restore migrated data
+    this.articleId = want.parameters?.['articleId'] as number;
+    // Restore page stack
+    this.context.restoreWindowStage(this.storage);
+  }
+}
+
+// Hot start (single-instance)
+onNewWant(want: Want, launchParam: AbilityConstant.LaunchParam) {
+  if (launchParam.launchReason === AbilityConstant.LaunchReason.CONTINUATION) {
+    this.articleId = want.parameters?.['articleId'] as number;
+    this.context.restoreWindowStage(this.storage);
+  }
+}
+```
+
+### Dynamic migration control
+
+```ts
+// Disable migration on certain pages
+this.context.setMissionContinueState(AbilityConstant.ContinueState.INACTIVE);
+
+// Re-enable when on a migrateable page
+this.context.setMissionContinueState(AbilityConstant.ContinueState.ACTIVE);
+```
+
+### Cross-device migration with different Ability names
+
+Use `continueType` in `module.json5` to link different Abilities across devices:
+
+```json5
+// Device A
+{ "name": "PhoneAbility", "continueType": ["myApp_main"] }
+
+// Device B
+{ "name": "TabletAbility", "continueType": ["myApp_main"] }
+```
+
+### Prerequisites
+
+- Both devices logged into same Huawei Account
+- Wi-Fi + Bluetooth enabled (or "Multi-device Collaboration Enhanced" enabled)
+- "Settings → Multi-device Collaboration → Continuation" enabled
+- App installed on both devices
