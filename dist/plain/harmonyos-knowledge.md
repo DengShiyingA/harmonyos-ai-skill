@@ -1,7 +1,7 @@
 
 # HarmonyOS (鸿蒙) Development
 
-Covers HarmonyOS 6.0.2(22) / HarmonyOS NEXT native app development — the Huawei mobile OS family that runs independently of Android (AOSP-free since HarmonyOS NEXT, released 2024). Primary language is **ArkTS** (a strict, statically-checked superset of TypeScript) and the primary UI framework is **ArkUI** (declarative, state-driven). HarmonyOS 6.0 adds system-level "Immersive Light Perception" visual effects (液态玻璃/沉浸光感视效).
+Covers HarmonyOS 6.0.2 (API 22) / HarmonyOS NEXT native app development — the Huawei mobile OS family that runs independently of Android (AOSP-free since HarmonyOS NEXT, released 2024). Primary language is **ArkTS** (a strict, statically-checked superset of TypeScript) and the primary UI framework is **ArkUI** (declarative, state-driven). HarmonyOS 6.0 adds system-level "Immersive Light Perception" visual effects (液态玻璃/沉浸光感视效).
 
 ## Platform snapshot
 
@@ -633,6 +633,7 @@ import { hilog } from '@kit.PerformanceAnalysisKit';
 |---|---|---|
 | ArkGraphics 2D | `ArkGraphics2D` | 2D Canvas drawing, effects, blur, shadow |
 | ArkGraphics 3D | `ArkGraphics3D` | 3D scene graph, glTF rendering |
+| UI Design Kit | `UIDesignKit` | `hdsDrawable` icon processing, `HdsNavigation` component |
 | XComponent | (ArkUI built-in) | Native OpenGL ES / Vulkan surface via NAPI |
 
 **AI**
@@ -1473,3 +1474,382 @@ Key rules:
 - Tests only run on real device or emulator — **Previewer does not support UiTest**
 - `Driver.create()` fresh per `it` block (don't share across tests)
 - Use `sleep` / `setTimeout` after navigation to let the new page render before asserting
+
+## ArkWeb — Web component
+
+Embed web content in ArkTS via the `Web` component from `@kit.ArkWeb`.
+
+```ts
+import { webview } from '@kit.ArkWeb';
+
+@Entry
+@Component
+struct BrowserPage {
+  controller: webview.WebviewController = new webview.WebviewController();
+
+  build() {
+    Column() {
+      Web({ src: 'https://example.com', controller: this.controller })
+        .javaScriptAccess(true)
+        .domStorageAccess(true)
+        .fileAccess(true)
+        .onPageBegin((event) => { console.log('loading:', event?.url); })
+        .onPageEnd((event) => { console.log('loaded:', event?.url); })
+        .onErrorReceive((event) => { console.error('web error:', event?.error.getErrorInfo()); })
+        .darkMode(WebDarkMode.Auto)   // follow system dark mode
+        .forceDarkAccess(true)
+    }
+  }
+}
+```
+
+### JS ↔ ArkTS bridge (`javaScriptProxy`)
+
+```ts
+// Register ArkTS object callable from JS
+Web({ src: 'https://example.com', controller: this.controller })
+  .javaScriptProxy({
+    object: {
+      callNative: (msg: string) => {
+        console.log('from JS:', msg);
+        return 'ArkTS received: ' + msg;
+      }
+    },
+    name: 'NativeBridge',
+    methodList: ['callNative'],
+    controller: this.controller
+  })
+// In the web page: window.NativeBridge.callNative('hello');
+
+// Call JS from ArkTS
+this.controller.runJavaScript('window.updateUI("data")', (err, result) => {
+  console.log('JS result:', result);
+});
+```
+
+### Custom User-Agent and cookies
+
+```ts
+// Append to default UA
+webview.WebviewController.setCustomUserAgent(
+  webview.WebviewController.getDefaultUserAgent() + ' MyApp/1.0'
+);
+
+// Manage cookies
+import { webCookie } from '@kit.ArkWeb';
+webCookie.setCookie('https://example.com', 'token=abc; path=/');
+webCookie.saveCookieAsync();   // persist to disk
+```
+
+### Intercept resource requests
+
+```ts
+Web({ src: '...', controller: this.controller })
+  .onInterceptRequest((event) => {
+    if (event?.request.getRequestUrl().includes('/api/')) {
+      // Return custom response
+      const resp = new WebResourceResponse();
+      resp.setResponseData('{"intercepted":true}');
+      resp.setResponseMimeType('application/json');
+      resp.setResponseEncoding('utf-8');
+      resp.setResponseCode(200);
+      resp.setReasonMessage('OK');
+      return resp;
+    }
+    return null;  // null = load normally
+  })
+```
+
+## Form Kit — ArkTS service cards (服务卡片)
+
+Service cards run in a sandboxed FormExtensionAbility process; they use a subset of ArkUI.
+
+### FormExtensionAbility lifecycle
+
+```ts
+// entry/src/main/ets/formextensionability/EntryFormAbility.ets
+import { FormExtensionAbility, formBindingData, FormInfo, formProvider } from '@kit.FormKit';
+import { Want } from '@kit.AbilityKit';
+
+export default class EntryFormAbility extends FormExtensionAbility {
+  onAddForm(want: Want) {
+    // Called when user adds card to home screen
+    const formData = { title: 'Hello', count: 0 };
+    return formBindingData.createFormBindingData(formData);
+  }
+
+  onCastToNormalForm(formId: string) { }
+
+  onUpdateForm(formId: string) {
+    // Periodic/requested update
+    const data = formBindingData.createFormBindingData({ count: Date.now() });
+    formProvider.updateForm(formId, data);
+  }
+
+  onRemoveForm(formId: string) { }
+
+  onFormEvent(formId: string, message: string) {
+    // Triggered by postCardAction in the card UI
+    console.log('card event:', formId, message);
+  }
+}
+```
+
+### Card UI (`EntryFormAbility/pages/Card.ets`)
+
+```ts
+// Cards are ArkUI components but with restricted APIs (no @State mutation from events)
+// Use postCardAction to route events back to FormExtensionAbility
+@Entry
+@Component
+struct CardPage {
+  @LocalStorageProp('title') title: string = '';
+  @LocalStorageProp('count') count: number = 0;
+
+  build() {
+    Column({ space: 8 }) {
+      Text(this.title).fontSize(16).fontWeight(FontWeight.Bold)
+      Text(`Count: ${this.count}`).fontSize(14)
+      Button('+1')
+        .onClick(() => {
+          postCardAction(this, {
+            action: 'message',
+            params: { event: 'increment' }
+          });
+        })
+    }.padding(12)
+  }
+}
+```
+
+### `module.json5` — declare the form
+
+```json5
+{
+  "extensionAbilities": [{
+    "name": "EntryFormAbility",
+    "srcEntry": "./ets/formextensionability/EntryFormAbility.ets",
+    "type": "form",
+    "metadata": [{
+      "name": "ohos.extension.form",
+      "resource": "$profile:form_config"
+    }]
+  }]
+}
+```
+
+### `resources/base/profile/form_config.json`
+
+```json
+{
+  "forms": [{
+    "name": "widget",
+    "displayName": "$string:widget_display_name",
+    "description": "$string:widget_desc",
+    "src": "./ets/formextensionability/pages/Card.ets",
+    "uiSyntax": "arkts",
+    "window": { "designWidth": 720, "autoDesignWidth": true },
+    "colorMode": "auto",
+    "isDynamic": true,
+    "updateEnabled": true,
+    "scheduledUpdateTime": "10:30",
+    "updateDuration": 1,
+    "defaultDimension": "2*2",
+    "supportDimensions": ["1*2", "2*2", "2*4"]
+  }]
+}
+```
+
+## UIDesignKit — icon processing & HdsNavigation
+
+Available from HarmonyOS 5.0+ (API 12+). Provides Huawei Design System components.
+
+### `hdsDrawable` — icon adaptive processing
+
+```ts
+import { hdsDrawable } from '@kit.UIDesignKit';
+
+// Render app icon with system-consistent adaptive shape (squircle, circle, etc.)
+const drawable = new hdsDrawable.HdsAdaptiveIconDrawable(
+  context,            // UIAbilityContext or ApplicationContext
+  iconResource,       // Resource ($r('app.media.icon'))
+  { size: 48 }        // options: size in vp
+);
+const pixelMap = await drawable.getPixelMap();
+```
+
+### `HdsNavigation` — system-style navigation component
+
+```ts
+import { HdsNavigation, HdsNavigationItem } from '@kit.UIDesignKit';
+
+@Entry
+@Component
+struct MainPage {
+  @State currentIndex: number = 0;
+  private tabs: HdsNavigationItem[] = [
+    { icon: $r('app.media.home'), selectedIcon: $r('app.media.home_filled'), label: '首页' },
+    { icon: $r('app.media.mine'), selectedIcon: $r('app.media.mine_filled'), label: '我的' },
+  ];
+
+  build() {
+    Column() {
+      // Page content
+      Blank()
+      HdsNavigation({
+        items: this.tabs,
+        selectedIndex: this.currentIndex,
+        onItemClick: (index: number) => { this.currentIndex = index; }
+      })
+    }.height('100%')
+  }
+}
+```
+
+`HdsNavigation` supports: dynamic blur background, custom content areas (badges, dot indicators), message count badges on items.
+
+## Map Kit — MapComponent
+
+```ts
+import { mapCommon, map } from '@kit.MapKit';
+import { AsyncCallback } from '@kit.BasicServicesKit';
+
+@Entry
+@Component
+struct MapPage {
+  private mapOptions: mapCommon.MapOptions = {
+    position: {
+      target: { latitude: 39.9042, longitude: 116.4074 },  // Beijing
+      zoom: 12
+    }
+  };
+  private mapController?: map.MapComponentController;
+
+  build() {
+    Column() {
+      MapComponent({
+        mapOptions: this.mapOptions,
+        mapCallback: (err, controller) => {
+          if (!err) {
+            this.mapController = controller;
+            this.addMarker();
+          }
+        }
+      }).width('100%').layoutWeight(1)
+    }
+  }
+
+  private addMarker() {
+    this.mapController?.addMarker({
+      position: { latitude: 39.9042, longitude: 116.4074 },
+      title: 'Tiananmen',
+      snippet: 'Beijing city center'
+    });
+  }
+}
+```
+
+Required permissions in `module.json5`: `ohos.permission.LOCATION` and `ohos.permission.APPROXIMATELY_LOCATION`.
+
+## Cold start optimization
+
+HarmonyOS measures cold start as: **app launch → first frame rendered**. Target: < 1000ms on mid-range device.
+
+### Lazy-import (`import()`)
+
+```ts
+// ❌ Eager — all modules parsed at startup even if unused
+import { HeavyModule } from '../utils/HeavyModule';
+
+// ✓ Lazy — parsed only when first used
+let heavyModule: typeof import('../utils/HeavyModule') | null = null;
+
+async function useHeavy() {
+  if (!heavyModule) {
+    heavyModule = await import('../utils/HeavyModule');
+  }
+  heavyModule.HeavyModule.doWork();
+}
+```
+
+### Network requests — defer until after first frame
+
+```ts
+// EntryAbility.ets
+onWindowStageCreate(windowStage: window.WindowStage) {
+  windowStage.loadContent('pages/Index', (err) => {
+    if (!err) {
+      // First frame committed — now safe to start network
+      AppStartupData.prefetch();
+    }
+  });
+}
+```
+
+### Other cold start rules
+
+- Avoid heavy synchronous work in `onCreate()` / `onWindowStageCreate()` — use TaskPool for >10ms tasks
+- Minimize global singleton construction at module load time
+- Use `@Reusable` on list item components to avoid remeasure/relayout on first display
+- Avoid `hilog` calls inside tight rendering loops (I/O cost)
+- Profile with DevEco Profiler → **Launch** task to see exact frame timeline
+
+## Memory optimization
+
+### `onMemoryLevel` callback
+
+```ts
+// AbilityStage.ets or UIAbility.ets
+onMemoryLevel(level: AbilityConstant.MemoryLevel): void {
+  if (level === AbilityConstant.MemoryLevel.MEMORY_LEVEL_CRITICAL) {
+    // Release non-essential caches immediately
+    ImageCache.instance.clear();
+    DataCache.instance.trimToSize(10);
+  } else if (level === AbilityConstant.MemoryLevel.MEMORY_LEVEL_LOW) {
+    DataCache.instance.trimToSize(50);
+  }
+}
+```
+
+### LRUCache — bounded image / data cache
+
+```ts
+import { util } from '@kit.ArkTS';
+
+class ImageCache {
+  static instance = new ImageCache();
+  private lru = new util.LRUCache<string, PixelMap>(50);  // max 50 entries
+
+  put(key: string, pm: PixelMap) { this.lru.put(key, pm); }
+  get(key: string): PixelMap | undefined { return this.lru.get(key); }
+  clear() { this.lru.clear(); }
+  trimToSize(n: number) {
+    while (this.lru.length > n) {
+      this.lru.afterRemoval(false, this.lru.keys()[0], undefined, undefined);
+    }
+  }
+}
+```
+
+### Purgeable memory (large bitmaps)
+
+```ts
+import { image } from '@kit.ImageKit';
+
+// Create PixelMap as purgeable — OS can reclaim when memory is tight,
+// and will regenerate it from the source on next access
+const pixelMap = await image.createPixelMap(buffer, {
+  size: { width: 1920, height: 1080 },
+  editable: false
+});
+// No extra API needed — PixelMap is automatically purgeable when editable=false
+// and created from a decodable source (file path or buffer)
+```
+
+### General memory rules
+
+- **Unregister listeners** in `aboutToDisappear()` / `onBackground()` to prevent leaks
+- **Avoid capturing `this`** in long-lived closures (keeps component alive)
+- **Reuse PixelMap objects** instead of recreating them for repeated renders
+- Use `image.ImageSource` + lazy decode for thumbnails — don't decode full resolution
+- TaskPool threads share no heap — `@Sendable` objects avoid copy but transfer ownership
