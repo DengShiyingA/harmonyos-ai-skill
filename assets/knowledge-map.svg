@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" font-family="-apple-system, 'PingFang SC', 'Söhne', 'Microsoft YaHei', sans-serif">
-  <rect width="1280" height="720" fill="#1a1714"/>
+  <rect width="1280" height="720" fill="#FAF5EE"/>
 
   <!-- Title -->
-  <text x="640" y="52" font-size="28" font-weight="800" fill="#f5ebe0" text-anchor="middle" letter-spacing="0.5">SKILL.md 知识架构</text>
-  <text x="640" y="82" font-size="15" fill="#9a8e80" text-anchor="middle">1200+ 行 · 从华为官方文档提取的实质知识 · 不是链接堆砌</text>
+  <text x="640" y="50" font-size="28" font-weight="800" fill="#2d2520" text-anchor="middle">SKILL.md 知识架构</text>
+  <text x="640" y="78" font-size="15" fill="#8a7b6b" text-anchor="middle">1200+ 行 · 从华为官方文档提取的实质知识</text>
 
   <!-- Center node -->
   <circle cx="640" cy="380" r="62" fill="#D97757"/>
@@ -11,62 +11,59 @@
   <text x="640" y="393" font-size="15" font-weight="700" fill="#fff" text-anchor="middle">NEXT</text>
 
   <!-- Connection lines -->
-  <line x1="590" y1="340" x2="290" y2="190" stroke="#D97757" stroke-width="1" opacity="0.25"/>
-  <line x1="695" y1="335" x2="990" y2="190" stroke="#E8C872" stroke-width="1" opacity="0.25"/>
-  <line x1="578" y1="380" x2="310" y2="360" stroke="#c4956a" stroke-width="1" opacity="0.25"/>
-  <line x1="702" y1="380" x2="970" y2="360" stroke="#D97757" stroke-width="1" opacity="0.25"/>
-  <line x1="590" y1="425" x2="290" y2="540" stroke="#E8C872" stroke-width="1" opacity="0.25"/>
-  <line x1="695" y1="425" x2="990" y2="540" stroke="#c0584a" stroke-width="1" opacity="0.25"/>
-  <line x1="640" y1="442" x2="640" y2="610" stroke="#c4956a" stroke-width="1" opacity="0.25"/>
+  <line x1="590" y1="340" x2="290" y2="190" stroke="#D97757" stroke-width="1.5" opacity="0.2"/>
+  <line x1="695" y1="335" x2="990" y2="190" stroke="#b8860b" stroke-width="1.5" opacity="0.2"/>
+  <line x1="578" y1="380" x2="310" y2="360" stroke="#c4956a" stroke-width="1.5" opacity="0.2"/>
+  <line x1="702" y1="380" x2="970" y2="360" stroke="#D97757" stroke-width="1.5" opacity="0.2"/>
+  <line x1="590" y1="425" x2="290" y2="540" stroke="#b8860b" stroke-width="1.5" opacity="0.2"/>
+  <line x1="695" y1="425" x2="990" y2="540" stroke="#c0584a" stroke-width="1.5" opacity="0.2"/>
+  <line x1="640" y1="442" x2="640" y2="610" stroke="#c4956a" stroke-width="1.5" opacity="0.2"/>
 
-  <!-- 1. ArkTS Language -->
-  <rect x="120" y="140" width="290" height="105" rx="16" fill="#252220" stroke="#D97757" stroke-width="1"/>
+  <!-- 1. ArkTS -->
+  <rect x="120" y="140" width="290" height="105" rx="16" fill="#fff" stroke="#D97757" stroke-width="1.5"/>
   <text x="265" y="170" font-size="16" font-weight="700" fill="#D97757" text-anchor="middle">ArkTS 语言</text>
-  <text x="265" y="192" font-size="11.5" fill="#c4b5a4" text-anchor="middle">严格模式 · 命名规范 · 10 条性能规则</text>
-  <text x="265" y="210" font-size="11.5" fill="#c4b5a4" text-anchor="middle">TypedArray · const 优化 · 编码风格</text>
-  <text x="265" y="228" font-size="11.5" fill="#c4b5a4" text-anchor="middle">V2 装饰器 · @Sendable · @Concurrent</text>
+  <text x="265" y="192" font-size="12" fill="#6b5d50" text-anchor="middle">严格模式 · 命名规范 · 10 条性能规则</text>
+  <text x="265" y="210" font-size="12" fill="#6b5d50" text-anchor="middle">TypedArray · const 优化 · 编码风格</text>
+  <text x="265" y="228" font-size="12" fill="#6b5d50" text-anchor="middle">V2 装饰器 · @Sendable · @Concurrent</text>
 
-  <!-- 2. ArkUI Components -->
-  <rect x="870" y="140" width="290" height="105" rx="16" fill="#252220" stroke="#E8C872" stroke-width="1"/>
-  <text x="1015" y="170" font-size="16" font-weight="700" fill="#E8C872" text-anchor="middle">ArkUI 组件</text>
-  <text x="1015" y="192" font-size="11.5" fill="#c4b5a4" text-anchor="middle">7 个生命周期 · 6 种布局容器 · 性能对比</text>
-  <text x="1015" y="210" font-size="11.5" fill="#c4b5a4" text-anchor="middle">@Reusable (69% 提速) · LazyForEach</text>
-  <text x="1015" y="228" font-size="11.5" fill="#c4b5a4" text-anchor="middle">animateTo · 共享元素转场 · 弹簧曲线</text>
+  <!-- 2. ArkUI -->
+  <rect x="870" y="140" width="290" height="105" rx="16" fill="#fff" stroke="#b8860b" stroke-width="1.5"/>
+  <text x="1015" y="170" font-size="16" font-weight="700" fill="#b8860b" text-anchor="middle">ArkUI 组件</text>
+  <text x="1015" y="192" font-size="12" fill="#6b5d50" text-anchor="middle">7 个生命周期 · 6 种布局容器 · 性能对比</text>
+  <text x="1015" y="210" font-size="12" fill="#6b5d50" text-anchor="middle">@Reusable (69% 提速) · LazyForEach</text>
+  <text x="1015" y="228" font-size="12" fill="#6b5d50" text-anchor="middle">animateTo · 共享元素转场 · 弹簧曲线</text>
 
-  <!-- 3. State Management -->
-  <rect x="60" y="300" width="290" height="105" rx="16" fill="#252220" stroke="#c4956a" stroke-width="1"/>
+  <!-- 3. State -->
+  <rect x="60" y="300" width="290" height="105" rx="16" fill="#fff" stroke="#c4956a" stroke-width="1.5"/>
   <text x="205" y="330" font-size="16" font-weight="700" fill="#c4956a" text-anchor="middle">状态管理</text>
-  <text x="205" y="352" font-size="11.5" fill="#c4b5a4" text-anchor="middle">V1: @State @Prop @Link @Observed</text>
-  <text x="205" y="370" font-size="11.5" fill="#c4b5a4" text-anchor="middle">V2: @Local @ObservedV2 @Trace @Monitor</text>
-  <text x="205" y="388" font-size="11.5" fill="#c4b5a4" text-anchor="middle">观察深度规则 · @Prop 深拷贝 · 性能指导</text>
+  <text x="205" y="352" font-size="12" fill="#6b5d50" text-anchor="middle">V1: @State @Prop @Link @Observed</text>
+  <text x="205" y="370" font-size="12" fill="#6b5d50" text-anchor="middle">V2: @Local @ObservedV2 @Trace @Monitor</text>
+  <text x="205" y="388" font-size="12" fill="#6b5d50" text-anchor="middle">观察深度规则 · @Prop 深拷贝 · 性能指导</text>
 
-  <!-- 4. Navigation & Concurrency -->
-  <rect x="930" y="300" width="290" height="105" rx="16" fill="#252220" stroke="#D97757" stroke-width="1"/>
+  <!-- 4. Nav & Concurrency -->
+  <rect x="930" y="300" width="290" height="105" rx="16" fill="#fff" stroke="#D97757" stroke-width="1.5"/>
   <text x="1075" y="330" font-size="16" font-weight="700" fill="#D97757" text-anchor="middle">导航 &amp; 并发</text>
-  <text x="1075" y="352" font-size="11.5" fill="#c4b5a4" text-anchor="middle">NavPathStack 完整 API · 路由拦截</text>
-  <text x="1075" y="370" font-size="11.5" fill="#c4b5a4" text-anchor="middle">TaskPool vs Worker · 优先级 / 分组</text>
-  <text x="1075" y="388" font-size="11.5" fill="#c4b5a4" text-anchor="middle">@Sendable 共享堆 (100x) · 3 分钟限制</text>
+  <text x="1075" y="352" font-size="12" fill="#6b5d50" text-anchor="middle">NavPathStack 完整 API · 路由拦截</text>
+  <text x="1075" y="370" font-size="12" fill="#6b5d50" text-anchor="middle">TaskPool vs Worker · 优先级 / 分组</text>
+  <text x="1075" y="388" font-size="12" fill="#6b5d50" text-anchor="middle">@Sendable 共享堆 (100x) · 3 分钟限制</text>
 
-  <!-- 5. 50+ Kits -->
-  <rect x="80" y="480" width="290" height="105" rx="16" fill="#252220" stroke="#E8C872" stroke-width="1"/>
-  <text x="225" y="510" font-size="16" font-weight="700" fill="#E8C872" text-anchor="middle">50+ HarmonyOS Kits</text>
-  <text x="225" y="532" font-size="11.5" fill="#c4b5a4" text-anchor="middle">应用框架 · 应用服务 · 系统 · 媒体</text>
-  <text x="225" y="550" font-size="11.5" fill="#c4b5a4" text-anchor="middle">图形 · AI · 开发工具 · 全部 import key</text>
-  <text x="225" y="568" font-size="11.5" fill="#c4b5a4" text-anchor="middle">PhotoViewPicker · CoreSpeechKit ASR</text>
+  <!-- 5. Kits -->
+  <rect x="80" y="480" width="290" height="105" rx="16" fill="#fff" stroke="#b8860b" stroke-width="1.5"/>
+  <text x="225" y="510" font-size="16" font-weight="700" fill="#b8860b" text-anchor="middle">50+ HarmonyOS Kits</text>
+  <text x="225" y="532" font-size="12" fill="#6b5d50" text-anchor="middle">应用框架 · 应用服务 · 系统 · 媒体</text>
+  <text x="225" y="550" font-size="12" fill="#6b5d50" text-anchor="middle">图形 · AI · 开发工具 · 全部 import key</text>
+  <text x="225" y="568" font-size="12" fill="#6b5d50" text-anchor="middle">PhotoViewPicker · CoreSpeechKit ASR</text>
 
-  <!-- 6. Quality & Security -->
-  <rect x="910" y="480" width="290" height="105" rx="16" fill="#252220" stroke="#c0584a" stroke-width="1"/>
+  <!-- 6. Quality -->
+  <rect x="910" y="480" width="290" height="105" rx="16" fill="#fff" stroke="#c0584a" stroke-width="1.5"/>
   <text x="1055" y="510" font-size="16" font-weight="700" fill="#c0584a" text-anchor="middle">质量 &amp; 安全</text>
-  <text x="1055" y="532" font-size="11.5" fill="#c4b5a4" text-anchor="middle">崩溃分类 · ErrorObserver · HiAppEvent</text>
-  <text x="1055" y="550" font-size="11.5" fill="#c4b5a4" text-anchor="middle">4 种后台任务 · 9 种 backgroundMode</text>
-  <text x="1055" y="568" font-size="11.5" fill="#c4b5a4" text-anchor="middle">10 条安全规则 · arkxtest · 16+ 断言</text>
+  <text x="1055" y="532" font-size="12" fill="#6b5d50" text-anchor="middle">崩溃分类 · ErrorObserver · HiAppEvent</text>
+  <text x="1055" y="550" font-size="12" fill="#6b5d50" text-anchor="middle">4 种后台任务 · 9 种 backgroundMode</text>
+  <text x="1055" y="568" font-size="12" fill="#6b5d50" text-anchor="middle">10 条安全规则 · arkxtest · 16+ 断言</text>
 
   <!-- 7. Tooling -->
-  <rect x="440" y="610" width="400" height="80" rx="16" fill="#252220" stroke="#c4956a" stroke-width="1"/>
+  <rect x="440" y="610" width="400" height="80" rx="16" fill="#fff" stroke="#c4956a" stroke-width="1.5"/>
   <text x="640" y="640" font-size="16" font-weight="700" fill="#c4956a" text-anchor="middle">工具链 &amp; 生态</text>
-  <text x="640" y="662" font-size="11.5" fill="#c4b5a4" text-anchor="middle">DevEco Studio 6.x · OHPM · ArkCompiler · hvigor · hdc</text>
-  <text x="640" y="680" font-size="11.5" fill="#c4b5a4" text-anchor="middle">30+ 最佳实践 · 10 个 Codelab · 培训认证 · 80+ 文档链接</text>
-
-  <!-- Bottom accent -->
-  <rect x="0" y="714" width="1280" height="6" fill="#D97757" opacity="0.6"/>
+  <text x="640" y="662" font-size="12" fill="#6b5d50" text-anchor="middle">DevEco Studio 6.x · OHPM · ArkCompiler · hvigor · hdc</text>
+  <text x="640" y="680" font-size="12" fill="#6b5d50" text-anchor="middle">30+ 最佳实践 · 10 个 Codelab · 培训认证 · 80+ 文档链接</text>
 </svg>
