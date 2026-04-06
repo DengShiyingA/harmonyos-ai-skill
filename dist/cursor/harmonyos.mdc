@@ -885,6 +885,27 @@ const result = await picker.select({
 const uris: string[] = result.photoUris;
 ```
 
+### File/document picker
+
+```ts
+import { picker } from '@kit.CoreFileKit';
+
+// Pick document files (PDF, DOCX, etc.)
+const documentPicker = new picker.DocumentViewPicker(context);
+const result = await documentPicker.select({
+  maxSelectNumber: 5,
+  fileSuffixFilters: ['.pdf', '.docx', '.xlsx'],  // optional filter
+});
+const uris: string[] = result;  // file URIs with temporary read permission
+
+// Save file to user-chosen location
+const savePicker = new picker.DocumentViewPicker(context);
+const saveResult = await savePicker.save({
+  newFileNames: ['export.pdf'],
+});
+const destUri: string = saveResult[0];
+```
+
 ### CoreSpeechKit — ASR audio format requirements
 
 ```ts
