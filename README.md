@@ -4,7 +4,7 @@
 
 <img src="./assets/hero-banner.svg" alt="HarmonyOS AI Skills" width="100%"/>
 
-# 🧠 HarmonyOS AI Skills
+# 🧠 HarmonyOS AI Skill
 
 ### 鸿蒙开发知识包 · 让 11+ AI 编程工具真正"懂"鸿蒙
 
