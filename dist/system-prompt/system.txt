@@ -3016,3 +3016,171 @@ uiContext.openBindSheet(sheetNode, {
 ```
 
 > **Note**: Do NOT use the deprecated `CustomDialog` or `@ohos.promptAction` — use `UIContext.getPromptAction().openCustomDialog()` and `UIContext.openBindSheet()` instead.
+
+## Keyboard layout adaptation (软键盘适配)
+
+### Set keyboard avoidance mode (in UIAbility)
+
+```ts
+import { KeyboardAvoidMode } from '@kit.ArkUI';
+
+// OFFSET = page lifts up (default); RESIZE = page compresses; NONE = keyboard overlaps
+windowStage.getMainWindowSync().getUIContext().setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE);
+```
+
+### Prevent a component from moving with keyboard
+
+```ts
+Row() { /* title bar — should stay fixed */ }
+  .expandSafeArea([SafeAreaType.KEYBOARD])
+  .zIndex(1)
+```
+
+### Monitor keyboard height
+
+```ts
+import { window } from '@kit.ArkUI';
+
+window.getLastWindow(this.getUIContext().getHostContext()).then(win => {
+  win.on('keyboardHeightChange', (height: number) => {
+    this.keyboardHeight = this.getUIContext().px2vp(height);
+  });
+});
+```
+
+### Focus control
+
+```ts
+TextInput().defaultFocus(true)                                    // auto-focus on page load
+this.getUIContext().getFocusController().requestFocus('inputId');  // programmatic focus
+this.getUIContext().getFocusController().clearFocus();             // dismiss keyboard
+```
+
+## Dark mode adaptation (深色模式适配)
+
+### Resource qualifier approach (recommended)
+
+Place light-mode colors/images in `resources/base/`, dark-mode variants (same filenames) in `resources/dark/`:
+
+```
+resources/base/element/color.json    → { "color": [{ "name": "bg_color", "value": "#FFFFFF" }] }
+resources/dark/element/color.json    → { "color": [{ "name": "bg_color", "value": "#1A1A1A" }] }
+resources/base/media/icon.png        → light icon
+resources/dark/media/icon.png        → dark icon
+```
+
+Usage: `$r('app.color.bg_color')` / `$r('app.media.icon')` — auto-switches with system theme.
+
+### Detect & react to color mode changes
+
+```ts
+// In EntryAbility — store current mode
+onCreate(): void {
+  AppStorage.setOrCreate('currentColorMode', this.context.config.colorMode);
+}
+onConfigurationUpdate(newConfig: Configuration): void {
+  AppStorage.setOrCreate('currentColorMode', newConfig.colorMode);
+}
+
+// In component — watch for changes
+@StorageProp('currentColorMode') @Watch('onColorModeChange')
+currentColorMode: number = ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET;
+
+onColorModeChange(): void {
+  const isDark = this.currentColorMode === ConfigurationConstant.ColorMode.COLOR_MODE_DARK;
+  // update status bar, custom logic, etc.
+}
+```
+
+### Programmatic mode switching
+
+```ts
+this.getUIContext().getHostContext()?.getApplicationContext()
+  .setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_DARK);   // or COLOR_MODE_LIGHT / COLOR_MODE_NOT_SET
+```
+
+## Background upload & download (request.agent)
+
+```ts
+import { request } from '@kit.BasicServicesKit';
+```
+
+### Background upload (supports pause/resume)
+
+```ts
+const config: request.agent.Config = {
+  action: request.agent.Action.UPLOAD,
+  url: 'https://example.com/upload',
+  mode: request.agent.Mode.BACKGROUND,
+  method: 'POST',
+  data: formItems,                       // Array of FormItem
+};
+const task = await request.agent.create(context, config);
+task.on('progress', (progress) => { /* track */ });
+task.on('completed', (progress) => { /* done */ });
+await task.start();
+await task.pause();    // pause
+await task.resume();   // resume with breakpoint
+```
+
+### Background download (auto breakpoint resume)
+
+```ts
+const config: request.agent.Config = {
+  action: request.agent.Action.DOWNLOAD,
+  url: 'https://example.com/file.zip',
+  mode: request.agent.Mode.BACKGROUND,
+  saveas: `./downloads/file.zip`,
+  overwrite: true,
+  gauge: true,
+};
+const task = await request.agent.create(context, config);
+task.on('progress', (progress) => { /* track */ });
+await task.start();
+```
+
+## Desktop shortcuts (桌面快捷方式)
+
+### 1. Create `resources/base/profile/shortcuts_config.json`
+
+```json
+{
+  "shortcuts": [
+    {
+      "shortcutId": "id_scan",
+      "label": "$string:shortcut_scan",
+      "icon": "$media:ic_scan",
+      "wants": [{
+        "bundleName": "com.example.myapp",
+        "moduleName": "entry",
+        "abilityName": "EntryAbility",
+        "parameters": { "shortcutKey": "ScanPage" }
+      }]
+    }
+  ]
+}
+```
+
+### 2. Register in module.json5
+
+```json5
+"abilities": [{
+  "name": "EntryAbility",
+  "metadata": [{
+    "name": "ohos.ability.shortcuts",
+    "resource": "$profile:shortcuts_config"
+  }]
+}]
+```
+
+### 3. Route based on shortcut parameter
+
+```ts
+// In EntryAbility — onCreate / onNewWant
+const shortcutKey = want?.parameters?.shortcutKey as string;
+if (shortcutKey === 'ScanPage') {
+  AppStorage.setOrCreate('targetPage', 'pages/Scan');
+}
+```
+
+Page reads `@StorageProp('targetPage')` and navigates accordingly.
