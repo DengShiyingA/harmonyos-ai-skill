@@ -290,6 +290,16 @@ Rules: only works within same parent; don't nest `@Reusable` inside `@Reusable`;
 - Set explicit dimensions on `List` inside `Scroll` — without them ALL children load at once
 - Avoid `@StorageLink` for frequently-changing data — propagates to all subscribers
 
+**onVisibleAreaChange** — trigger logic when component enters/leaves viewport:
+```ts
+Image(item.url)
+  .onVisibleAreaChange([0.0, 1.0], (isVisible: boolean, currentRatio: number) => {
+    if (isVisible && currentRatio >= 1.0) { this.loadHighRes(); }    // fully visible
+    if (!isVisible) { this.releaseImage(); }                          // off screen
+  })
+```
+Use cases: lazy image loading, video auto-play/pause on scroll, exposure analytics.
+
 ### Animation
 
 **Explicit animation (`animateTo`)** — state changes in closure animate:
@@ -930,6 +940,51 @@ netCon.register(() => {});  // activate subscriptions
 // Cleanup
 netCon.unregister(() => {});
 ```
+
+### WebSocket
+
+```ts
+import { webSocket } from '@kit.NetworkKit';
+
+const ws = webSocket.createWebSocket();
+ws.on('open', () => { ws.send('hello'); });
+ws.on('message', (err, data: string | ArrayBuffer) => {
+  console.info('received:', typeof data === 'string' ? data : 'binary');
+});
+ws.on('close', (err, { code, reason }) => { /* closed */ });
+ws.on('error', (err) => { /* handle */ });
+
+ws.connect('wss://example.com/ws', { header: { 'Authorization': 'Bearer xxx' } });
+
+// Send
+ws.send(JSON.stringify({ type: 'chat', text: 'hi' }));
+
+// Close
+ws.close();
+```
+
+### Launch app by type (startAbilityByType)
+
+```ts
+import { common } from '@kit.AbilityKit';
+
+const context = getContext(this) as common.UIAbilityContext;
+
+// Open navigation app with destination
+context.startAbilityByType('navigation', {
+  sceneType: 1,
+  destinationLatitude: 39.9042,
+  destinationLongitude: 116.4074,
+  destinationName: 'Beijing',
+} as Record<string, Object>);
+
+// Open browser
+context.startAbilityByType('browser', {
+  uri: 'https://example.com',
+} as Record<string, Object>);
+```
+
+Supported types: `navigation`, `browser`, `email`, `finance`, `transit`, etc.
 
 ### Permissions
 
