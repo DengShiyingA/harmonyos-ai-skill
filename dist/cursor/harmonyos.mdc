@@ -455,6 +455,37 @@ this.getUIContext().getPromptAction().showToast({
 });
 ```
 
+### Common form components — quick reference
+
+| Component | Key Props | Example |
+|---|---|---|
+| `Checkbox` | `select`, `onChange((val: boolean) => {})` | `Checkbox({ name: 'agree' }).select(this.agreed)` |
+| `Toggle` | `type(ToggleType.Switch)`, `isOn`, `onChange` | `Toggle({ type: ToggleType.Switch, isOn: $$this.on })` |
+| `Radio` | `value`, `group`, `checked`, `onChange` | `Radio({ value: 'male', group: 'gender' }).checked(true)` |
+| `Select` | `options: SelectOption[]`, `selected`, `value`, `onSelect` | `Select([{value:'A'},{value:'B'}]).selected(0)` |
+| `Slider` | `value`, `min`, `max`, `step`, `onChange` | `Slider({ value: $$this.val, min: 0, max: 100 })` |
+| `DatePicker` | `start`, `end`, `selected`, `onChange` | `DatePicker({ selected: this.date }).onChange((v) => {})` |
+| `TimePicker` | `selected`, `useMilitaryTime`, `onChange` | `TimePicker({ selected: this.time })` |
+| `Search` | `value`, `placeholder`, `onSubmit`, `onChange` | `Search({ value: $$this.keyword, placeholder: 'Search' })` |
+| `Progress` | `value`, `total`, `type(ProgressType.Linear)` | `Progress({ value: 60, total: 100 })` |
+| `LoadingProgress` | — | `LoadingProgress().width(48).color('#007DFF')` |
+
+### EventHub — UIAbility ↔ page communication
+
+```ts
+// In UIAbility — emit event
+this.context.eventHub.emit('dataReady', { items: [...] });
+
+// In page — subscribe
+const context = getContext(this) as common.UIAbilityContext;
+context.eventHub.on('dataReady', (data: Record<string, ESObject>) => {
+  this.items = data.items;
+});
+
+// Unsubscribe
+context.eventHub.off('dataReady');
+```
+
 ### HarmonyOS 6.0 visual effects (沉浸光感视效 / 液态玻璃)
 
 HarmonyOS 6.0 (API 23) introduces system-level "Immersive Light Perception" visual effects. Users enable via Settings → Desktop & Personalization → Immersive Light Effect (强/均衡/弱). Developers achieve similar effects through these ArkUI attributes:
