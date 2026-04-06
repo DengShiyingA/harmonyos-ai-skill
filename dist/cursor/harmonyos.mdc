@@ -3192,3 +3192,143 @@ if (shortcutKey === 'ScanPage') {
 ```
 
 Page reads `@StorageProp('targetPage')` and navigates accordingly.
+
+## Cross-module resource access (跨模块资源访问)
+
+### Access HAR resources (same as local)
+
+```ts
+Text($r('app.string.string_in_har'))
+Image($r('app.media.image_in_har'))
+// Better performance with .id for resourceManager:
+this.context.resourceManager.getStringSync($r('app.string.string_in_har').id);
+```
+
+### Access HSP resources (prefix with module name)
+
+```ts
+Text($r('[hsp1].string.string_in_hsp'))
+Image($r('[hsp1].media.image_in_hsp'))
+```
+
+Or via `createModuleContext`:
+
+```ts
+import { common } from '@kit.AbilityKit';
+const hspContext = await common.application.createModuleContext(this.context, 'hsp1');
+const str = hspContext.resourceManager.getStringByNameSync('string_in_hsp');
+```
+
+## Custom font (自定义字体)
+
+```ts
+// 1. Register font (in EntryAbility onWindowStageCreate or component aboutToAppear)
+const uiContext = windowStage.getMainWindowSync().getUIContext();
+uiContext.getFont().registerFont({
+  familyName: 'MyCustomFont',
+  familySrc: $rawfile('MyCustomFont.ttf'),
+});
+
+// 2. Use in component
+Text('Hello').fontFamily('MyCustomFont')
+```
+
+Font size follow/ignore system setting — configure in `profile/configuration.json`:
+
+```json
+{ "configuration": { "fontSizeScale": "followSystem", "fontSizeMaxScale": "2" } }
+```
+
+Reference in `app.json5`: `"configuration": "$profile:configuration"`.
+
+## Screen orientation (横竖屏切换)
+
+```ts
+import { window } from '@kit.ArkUI';
+
+// Get window instance
+const win = await window.getLastWindow(this.context);
+
+// Set orientation
+win.setPreferredOrientation(window.Orientation.USER_ROTATION_LANDSCAPE);   // enter landscape
+win.setPreferredOrientation(window.Orientation.USER_ROTATION_PORTRAIT);    // back to portrait
+win.setPreferredOrientation(window.Orientation.AUTO_ROTATION);             // follow sensor
+
+// Monitor window size for layout adaptation
+win.on('windowSizeChange', (size) => {
+  const orientation = display.getDefaultDisplaySync().orientation;
+  this.isLandscape = (orientation === display.Orientation.LANDSCAPE ||
+                      orientation === display.Orientation.LANDSCAPE_INVERTED);
+});
+```
+
+Also configurable in `module.json5`: `"abilities": [{ "orientation": "portrait" }]`.
+Options: `portrait`, `landscape`, `auto_rotation`, `auto_rotation_landscape`, `follow_desktop`.
+
+## Clipboard — pasteboard read/write
+
+```ts
+import { pasteboard } from '@kit.BasicServicesKit';
+
+// Write text to clipboard
+const pasteData = pasteboard.createData(pasteboard.MIMETYPE_TEXT_PLAIN, 'Hello World');
+const board = pasteboard.getSystemPasteboard();
+await board.setData(pasteData);
+
+// Read from clipboard
+const data = await board.getData();
+if (data.hasType(pasteboard.MIMETYPE_TEXT_PLAIN)) {
+  const text = data.getPrimaryText();
+}
+```
+
+Supported MIME types: `MIMETYPE_TEXT_PLAIN`, `MIMETYPE_TEXT_HTML`, `MIMETYPE_TEXT_URI`, `MIMETYPE_PIXELMAP`.
+
+## Gesture conflict resolution (手势冲突处理)
+
+### hitTestBehavior — control touch event response
+
+```ts
+Stack() {
+  BottomComponent().hitTestBehavior(HitTestMode.None)       // skip self, pass to sibling
+  TopComponent().hitTestBehavior(HitTestMode.Transparent)   // self responds AND passes to sibling
+}
+```
+
+| Mode | Behavior |
+|---|---|
+| `Default` | Self responds, blocks siblings |
+| `Transparent` | Self responds, does NOT block siblings |
+| `None` | Skips self, passes to siblings |
+| `Block` | Only self responds, stops all propagation |
+
+### Gesture binding priority
+
+```ts
+// Parent takes priority over child for same gesture type
+ParentComponent()
+  .priorityGesture(TapGesture().onAction(() => { /* parent handles */ }))
+
+// Both parent and child respond simultaneously
+ParentComponent()
+  .parallelGesture(PanGesture().onAction(() => { /* parent also handles */ }))
+
+// Block child gestures entirely
+ParentComponent()
+  .gesture(TapGesture(), GestureMask.IgnoreInternal)
+```
+
+### GestureGroup modes
+
+```ts
+// Sequential: all must succeed in order
+GestureGroup(GestureMode.Sequence, LongPressGesture(), PanGesture())
+
+// Parallel: all run simultaneously
+GestureGroup(GestureMode.Parallel, PinchGesture(), RotationGesture())
+
+// Exclusive: first to succeed wins
+GestureGroup(GestureMode.Exclusive, TapGesture(), SwipeGesture())
+```
+
+> **Note**: System gestures (onClick, onTouch, drag, bindMenu) always win over custom gestures of the same type.
