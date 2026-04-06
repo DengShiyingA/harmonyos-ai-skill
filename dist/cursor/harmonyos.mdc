@@ -1863,3 +1863,281 @@ const pixelMap = await image.createPixelMap(buffer, {
 - **Reuse PixelMap objects** instead of recreating them for repeated renders
 - Use `image.ImageSource` + lazy decode for thumbnails — don't decode full resolution
 - TaskPool threads share no heap — `@Sendable` objects avoid copy but transfer ownership
+
+## Camera Kit
+
+### CameraPicker — no-permission photo/video capture
+
+Simplest way to capture a photo or video — launches the system camera UI. **No camera permission required.**
+
+```ts
+import { camera, cameraPicker as picker } from '@kit.CameraKit';
+import { fileIo, fileUri } from '@kit.CoreFileKit';
+
+// Create a temp file to receive the capture result
+const pathDir = getContext(this).filesDir;
+const filePath = pathDir + `/${Date.now()}.tmp`;
+fileIo.createRandomAccessFileSync(filePath, fileIo.OpenMode.CREATE);
+
+const pickerProfile: picker.PickerProfile = {
+  cameraPosition: camera.CameraPosition.CAMERA_POSITION_BACK,
+  saveUri: fileUri.getUriFromPath(filePath)   // omit to save to media library
+};
+
+// Launch system camera — user takes photo/video and confirms
+const result = await picker.pick(
+  getContext(this),
+  [picker.PickerMediaType.PHOTO, picker.PickerMediaType.VIDEO],
+  pickerProfile
+);
+
+if (result.resultCode === 0) {
+  const uri = result.resultUri;               // file URI of captured media
+  const isPhoto = result.mediaType === picker.PickerMediaType.PHOTO;
+}
+```
+
+### Full camera session (preview + photo capture)
+
+Requires `ohos.permission.CAMERA`. Flow: CameraManager → CameraInput → Session → PreviewOutput/PhotoOutput.
+
+```ts
+import { camera } from '@kit.CameraKit';
+
+// 1. Get camera manager and device
+const cameraManager = camera.getCameraManager(context);
+const cameras = cameraManager.getSupportedCameras();
+const cameraDevice = cameras[0];
+
+// 2. Create input and open
+const cameraInput = cameraManager.createCameraInput(cameraDevice);
+await cameraInput.open();
+
+// 3. Get output capabilities
+const capability = cameraManager.getSupportedOutputCapability(
+  cameraDevice, camera.SceneMode.NORMAL_PHOTO
+);
+
+// 4. Create preview output (surfaceId from XComponent)
+const previewOutput = cameraManager.createPreviewOutput(
+  capability.previewProfiles[0], surfaceId
+);
+
+// 5. Create photo output
+const photoOutput = cameraManager.createPhotoOutput(capability.photoProfiles[0]);
+
+// 6. Build and start session
+const session = cameraManager.createSession(camera.SceneMode.NORMAL_PHOTO) as camera.PhotoSession;
+session.beginConfig();
+session.addInput(cameraInput);
+session.addOutput(previewOutput);
+session.addOutput(photoOutput);
+await session.commitConfig();
+await session.start();
+
+// 7. Capture photo
+photoOutput.on('photoAvailable', (err, photo) => {
+  const imageObj = photo.main;
+  imageObj.getComponent(image.ComponentType.JPEG, (err, component) => {
+    const buffer: ArrayBuffer = component.byteBuffer!;
+    // Save buffer to file, then release
+    imageObj.release();
+  });
+});
+photoOutput.capture({ quality: camera.QualityLevel.QUALITY_LEVEL_HIGH });
+
+// 8. Cleanup: session.stop() → cameraInput.close() → previewOutput.release() → session.release()
+```
+
+### XComponent for camera preview
+
+```ts
+@Entry @Component
+struct CameraPreview {
+  private ctrl = new XComponentController();
+  private surfaceId = '';
+
+  build() {
+    XComponent({ type: XComponentType.SURFACE, controller: this.ctrl })
+      .onLoad(() => {
+        this.surfaceId = this.ctrl.getXComponentSurfaceId();
+        // Use this.surfaceId to create previewOutput
+      })
+      .width('100%').height('100%')
+  }
+}
+```
+
+Key permissions: `ohos.permission.CAMERA` (photo/video), `ohos.permission.MICROPHONE` (audio recording).
+
+## Audio Kit — playback & recording
+
+### AudioRenderer (ArkTS) — PCM playback
+
+```ts
+import { audio } from '@kit.AudioKit';
+
+const rendererOptions: audio.AudioRendererOptions = {
+  streamInfo: {
+    samplingRate: audio.AudioSamplingRate.SAMPLE_RATE_48000,
+    channels: audio.AudioChannel.CHANNEL_2,
+    sampleFormat: audio.AudioSampleFormat.SAMPLE_FORMAT_S16LE,
+    encodingType: audio.AudioEncodingType.ENCODING_TYPE_RAW
+  },
+  rendererInfo: {
+    usage: audio.StreamUsage.STREAM_USAGE_MUSIC,  // determines volume type & focus
+    rendererFlags: 0
+  }
+};
+
+const renderer = await audio.createAudioRenderer(rendererOptions);
+renderer.on('writeData', (buffer: ArrayBuffer) => {
+  // Fill buffer with PCM data
+  return audio.AudioDataCallbackResult.VALID;
+});
+await renderer.start();
+// ... renderer.pause() / renderer.stop() / renderer.release()
+```
+
+### Audio focus (InterruptEvent)
+
+System manages audio focus automatically based on `StreamUsage`. Listen for focus changes:
+
+```ts
+renderer.on('audioInterrupt', (event: audio.InterruptEvent) => {
+  if (event.forceType === audio.InterruptForceType.INTERRUPT_FORCE) {
+    switch (event.hintType) {
+      case audio.InterruptHint.INTERRUPT_HINT_PAUSE:
+        // System paused us — update UI to paused state
+        break;
+      case audio.InterruptHint.INTERRUPT_HINT_STOP:
+        // Permanently lost focus — stop playback
+        break;
+      case audio.InterruptHint.INTERRUPT_HINT_DUCK:
+        // Volume lowered to 20% — optional UI update
+        break;
+      case audio.InterruptHint.INTERRUPT_HINT_UNDUCK:
+        // Volume restored
+        break;
+    }
+  } else if (event.hintType === audio.InterruptHint.INTERRUPT_HINT_RESUME) {
+    // Can resume playback (SHARE type — app decides)
+    await renderer.start();
+  }
+});
+```
+
+### StreamUsage → volume type mapping
+
+| StreamUsage | Volume type | Typical use |
+|---|---|---|
+| `MUSIC` / `MOVIE` / `AUDIOBOOK` / `GAME` | Media | Music, video, audiobook, game BGM |
+| `VOICE_COMMUNICATION` | Voice call | VoIP calls |
+| `RINGTONE` / `NOTIFICATION` | Ringtone | Incoming call, notifications |
+| `ALARM` | Alarm | Alarms (plays on speaker even with BT) |
+| `NAVIGATION` | — | Nav voice (ducks music, doesn't pause) |
+
+### AudioSession — custom focus strategy
+
+```ts
+const audioManager = audio.getAudioManager();
+const sessionManager = audioManager.getSessionManager();
+
+// Activate session with custom concurrency mode
+const strategy: audio.AudioSessionStrategy = {
+  concurrencyMode: audio.AudioConcurrencyMode.CONCURRENCY_PAUSE_OTHERS
+};
+await sessionManager.activateAudioSession(strategy);
+
+// Monitor deactivation
+sessionManager.on('audioSessionDeactivated', (event) => {
+  console.info('Session deactivated:', event.reason);
+});
+
+// When done
+await sessionManager.deactivateAudioSession();
+```
+
+Concurrency modes: `CONCURRENCY_DEFAULT`, `CONCURRENCY_MIX_WITH_OTHERS`, `CONCURRENCY_DUCK_OTHERS`, `CONCURRENCY_PAUSE_OTHERS`.
+
+### Background playback requirements
+
+Apps playing audio in background **must**:
+- For media/game streams (`MUSIC`/`MOVIE`/`AUDIOBOOK`/`GAME`): integrate **AVSession** AND request **long-running task** (`AUDIO_PLAYBACK`)
+- For other audible streams: request `AUDIO_PLAYBACK` long-running task only
+- Without these, system will mute and freeze the app when backgrounded
+
+## Code obfuscation (ArkGuard)
+
+Enable in `build-profile.json5` → `arkOptions.obfuscation`. ArkGuard supports name obfuscation, code compression, and comment removal for ArkTS/TS/JS.
+
+### Key obfuscation options
+
+```
+# obfuscation-rules.txt
+
+-enable-property-obfuscation       # obfuscate property names
+-enable-toplevel-obfuscation       # obfuscate top-level scope names
+-enable-export-obfuscation         # obfuscate import/export names
+-enable-filename-obfuscation       # obfuscate file/folder names
+-enable-string-property-obfuscation  # also obfuscate string literal property names
+-compact                           # remove whitespace and newlines
+-remove-log                        # delete console.* statements
+-print-namecache ./nameCache.json  # save name mapping (keep for crash analysis!)
+```
+
+### Common whitelist scenarios (`-keep-property-name`)
+
+These properties **must** be whitelisted to avoid runtime errors:
+
+```
+-keep-property-name
+# 1. Dynamic property access
+# obj['x' + i]  → keep x0, x1, x2 ...
+# Object.defineProperty(obj, 'y', {})  → keep y
+
+# 2. JSON parsing fields
+# JSON.parse / JSON.stringify → keep all serialized field names
+
+# 3. Network request fields
+# http.request extraData: { username, password } → keep field names
+
+# 4. Database fields (ValuesBucket keys)
+# relationalStore column names → keep
+
+# 5. NAPI / .so interop
+# import from 'libentry.so' → keep exported function names
+
+# 6. ArkUI @Component @State properties are auto-preserved (no action needed)
+# SDK API names are auto-preserved (no action needed)
+```
+
+### Whitelist for file names (`-keep-file-name`)
+
+```
+-keep-file-name
+# System-loaded files that must not be renamed:
+# - Worker thread files
+# - Ability entry files  (auto-collected since DevEco 5.0.3.500)
+# - Dynamic import paths:  const m = await import('./SomePath')
+# - System route table paths (pageSourceFile in route_map.json, auto since API 20)
+```
+
+### Preserve specific names in source (`@KeepSymbol`)
+
+```ts
+// Since API 19: use comments to mark names as non-obfuscatable
+// @KeepSymbol
+class ImportantClass {
+  // @KeepSymbol
+  criticalProp: string = '';
+}
+```
+
+### Gotchas
+
+- ArkGuard uses **global** property whitelisting — if you keep `name`, ALL properties named `name` across all files are kept
+- `enum` members are auto-collected into whitelist when building HAR with property obfuscation
+- Always save `nameCache.json` per release — needed to decode obfuscated crash stacks
+- `-compact` removes all newlines → crash stack line numbers become useless (column info not provided in release builds)
+- String properties matching SDK API constants (e.g., `'ohos.want.action.home'`) are NOT auto-whitelisted — add them manually if used as property keys
