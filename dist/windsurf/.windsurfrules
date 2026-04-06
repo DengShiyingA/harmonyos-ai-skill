@@ -225,6 +225,26 @@ struct Index {
 
 **RelativeContainer:** Use `__container__` as anchor ID for the container itself. Each child needs `.id()`. Set `.alignRules({ top: { anchor: 'id', align: VerticalAlign.Bottom } })`.
 
+**Blank():** Fills remaining space in Row/Column — use for "label ... value" layouts: `Row() { Text('Name'); Blank(); Text('Value') }`.
+
+**displayPriority:** Lower-priority children auto-hide when container shrinks. `Row() { A().displayPriority(1); B().displayPriority(3); C().displayPriority(1) }` — A and C hide first.
+
+**layoutWeight:** Proportional sizing — `Row() { Column().layoutWeight(1); Column().layoutWeight(2) }` gives 1:2 ratio.
+
+**AttributeModifier** — reusable style object:
+```ts
+class PrimaryButtonModifier implements AttributeModifier<ButtonAttribute> {
+  applyNormalAttribute(instance: ButtonAttribute): void {
+    instance.width('100%').height(48).fontSize(16).fontColor(Color.White).backgroundColor('#007DFF');
+  }
+  applyPressedAttribute(instance: ButtonAttribute): void {
+    instance.backgroundColor('#0056B3');
+  }
+}
+// Usage:
+Button('Submit').attributeModifier(new PrimaryButtonModifier())
+```
+
 ### Performance-critical patterns
 
 **`LazyForEach` for large lists** (only renders visible items):
@@ -887,6 +907,28 @@ async function fetchJson(url: string): Promise<string> {
 }
 ```
 
+### Network connectivity monitoring
+
+```ts
+import { connection } from '@kit.NetworkKit';
+
+// Check current network state
+const hasNet = connection.hasDefaultNetSync();
+
+// Monitor network changes
+const netCon = connection.createNetConnection();
+netCon.on('netAvailable', () => { /* network restored */ });
+netCon.on('netLost', () => { /* network lost */ });
+netCon.on('netCapabilitiesChange', (info: connection.NetCapabilityInfo) => {
+  const isWifi = info.netCap.bearerTypes.includes(connection.NetBearType.BEARER_WIFI);
+  const isCellular = info.netCap.bearerTypes.includes(connection.NetBearType.BEARER_CELLULAR);
+});
+netCon.register(() => {});  // activate subscriptions
+
+// Cleanup
+netCon.unregister(() => {});
+```
+
 ### Permissions
 
 Declare in `module.json5` → `requestPermissions`. For user-granted permissions, request at runtime via `abilityAccessCtrl.createAtManager().requestPermissionsFromUser(context, [...])`.
@@ -1124,9 +1166,20 @@ const bundleInfo = await bundleManager.getBundleInfoForSelf(
 const status = await atManager.checkAccessToken(
   bundleInfo.appInfo.accessTokenId, 'ohos.permission.CAMERA');
 
-// Request (if user previously rejected, use requestPermissionOnSetting instead)
-atManager.requestPermissionsFromUser(context,
+// Step 1 — Request from user
+const result = await atManager.requestPermissionsFromUser(context,
   ['ohos.permission.CAMERA', 'ohos.permission.MICROPHONE']);
+if (result.authResults[0] === 0) {
+  // Granted
+} else if (result.dialogShownResults?.[0]) {
+  // User saw dialog but denied — show in-app guidance, don't re-pop
+} else {
+  // Step 2 — Fallback: open settings dialog (user previously denied permanently)
+  atManager.requestPermissionOnSetting(context,
+    ['ohos.permission.CAMERA']).then((statuses) => {
+    // statuses[0]: 0 = granted, -1 = denied
+  });
+}
 ```
 
 **Data encryption levels:** EL1 (device-level) → EL2 (user-level, default) → EL3 (accessible while locked) → EL4 (inaccessible when locked)
@@ -3189,7 +3242,27 @@ uiContext.openBindSheet(sheetNode, {
 }, targetComponentId);
 ```
 
-> **Note**: Do NOT use the deprecated `CustomDialog` or `@ohos.promptAction` — use `UIContext.getPromptAction().openCustomDialog()` and `UIContext.openBindSheet()` instead.
+### bindContentCover (full-screen modal overlay)
+
+```ts
+@State isPresented: boolean = false;
+
+@Builder
+fullScreenContent() {
+  Column() {
+    Text('Full Screen Modal').fontSize(20)
+    Button('Close').onClick(() => { this.isPresented = false; })
+  }.width('100%').height('100%').backgroundColor(Color.White)
+}
+
+// Trigger:
+Button('Show').onClick(() => { this.isPresented = true; })
+  .bindContentCover($$this.isPresented, this.fullScreenContent(), {
+    modalTransition: ModalTransition.DEFAULT,   // .NONE, .ALPHA
+  })
+```
+
+> **Note**: Do NOT use the deprecated `CustomDialog` or `@ohos.promptAction` — use `UIContext.getPromptAction().openCustomDialog()`, `UIContext.openBindSheet()`, and `.bindContentCover()` instead.
 
 ## Keyboard layout adaptation (软键盘适配)
 
