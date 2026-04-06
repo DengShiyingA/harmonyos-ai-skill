@@ -338,6 +338,7 @@ response = client.messages.create(
 harmonyos-ai-skills/
 ├─ .gitignore
 ├─ LICENSE
+├─ README_EN.md
 ├─ harmonyos-development/
 │  └─ SKILL.md                          ← 唯一的知识源文件，只编辑这里
 ├─ scripts/
