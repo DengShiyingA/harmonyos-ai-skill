@@ -1,25 +1,36 @@
 ---
 name: harmonyos-development
 description: >
-  1400+ lines of production-ready HarmonyOS 6.0.2 / NEXT (鸿蒙) development knowledge —
-  ArkTS language rules, ArkUI component patterns, 50+ Kit APIs, performance
-  optimization, and common gotchas extracted from official Huawei documentation.
+  1400+ lines of production-ready HarmonyOS 6.0.2(22) / NEXT (鸿蒙) development knowledge.
+  Covers: ArkTS strict-mode rules & 10 perf coding rules, ArkUI declarative UI (7 lifecycle
+  callbacks, 6 layout containers with perf ranking, LazyForEach + @Reusable 69% faster),
+  state management V1 (@State/@Prop/@Link/@Observed/@ObjectLink) + V2 (@ComponentV2/@Local/
+  @ObservedV2/@Trace/@Monitor) + StateStore global state, NavPathStack full API with route
+  interception, animation (animateTo/geometryTransition/spring), HarmonyOS 6.0 visual effects
+  (液态玻璃/BlurStyle 13 values/backgroundEffect/systemMaterialEffect/pointLight), 50+ Kit
+  catalog with import keys, concurrency (TaskPool/TaskGroup/Worker/@Concurrent/@Sendable 100x
+  faster), crash handling (JS_ERROR/CPP_CRASH/APP_FREEZE/ErrorObserver/HiAppEvent), 4 background
+  task types, 10 security coding rules, arkxtest testing (JsUnit 16+ assertions/UiTest), multi-device
+  responsive layout (breakpoints/GridRow), DevEco Studio 6.0.2 setup, OHPM, ArkCompiler, Cangjie.
+  All extracted from official Huawei documentation with 80+ verified reference URLs.
 
-  Trigger keywords (EN): HarmonyOS, HarmonyOS NEXT, HarmonyOS 6.0.2, ArkTS, ArkUI, .ets file, StateStore,
-  DevEco Studio, Stage model, UIAbility, ExtensionAbility, AbilityStage, WindowStage,
-  @State, @Prop, @Link, @Provide, @Consume, @Observed, @ObjectLink, @Watch, @Builder,
-  @Styles, @Extend, @StorageLink, @LocalStorageLink, @ComponentV2, @Local, @ObservedV2,
-  @Trace, @Monitor, AppStorageV2, aboutToAppear, onDidBuild, aboutToReuse, onPageShow,
-  Navigation, NavPathStack, navDestination, router, Column, Row, Stack, Flex, List,
-  RelativeContainer, GridRow, GridCol, LazyForEach, ForEach, @Reusable, cachedCount,
-  animateTo, .animation(), Curve, geometryTransition, spring animation,
+  Trigger keywords (EN): HarmonyOS, HarmonyOS NEXT, HarmonyOS 6.0.2, API 22, ArkTS, ArkUI,
+  .ets file, DevEco Studio, Stage model, UIAbility, ExtensionAbility, AbilityStage, WindowStage,
+  @State, @Prop, @Link, @Provide, @Consume, @Observed, @ObjectLink, @Watch, @Builder, @Styles,
+  @Extend, @StorageLink, @LocalStorageLink, @ComponentV2, @Local, @ObservedV2, @Trace, @Monitor,
+  AppStorageV2, StateStore, aboutToAppear, onDidBuild, aboutToReuse, aboutToRecycle, onPageShow,
+  Navigation, NavPathStack, navDestination, router, setInterception,
+  Column, Row, Stack, Flex, List, RelativeContainer, GridRow, GridCol,
+  LazyForEach, ForEach, @Reusable, cachedCount, IDataSource,
+  animateTo, .animation(), Curve, geometryTransition, spring animation, springMotion,
   Ability Kit, Network Kit, Media Kit, Location Kit, Core Speech Kit, Core Vision Kit,
   Scan Kit, Push Kit, IAP Kit, Payment Kit, Live View Kit, Camera Kit, Media Library Kit,
   Audio Kit, Image Kit, ArkGraphics 2D, ArkGraphics 3D, Notification Kit, ArkData, ArkWeb,
   Form Kit, Connectivity Kit, Crypto Architecture Kit, Agent Framework Kit, MindSpore Lite,
   http.createHttp, preferences, relationalStore, distributedKVStore, fileIo, photoAccessHelper,
   geoLocationManager, speechRecognizer, notificationManager, hilog, wantAgent,
-  TaskPool, TaskGroup, Worker, @Concurrent, @Sendable, taskpool.execute, SharedArrayBuffer, long-time task,
+  TaskPool, TaskGroup, Worker, @Concurrent, @Sendable, taskpool.execute, SharedArrayBuffer,
+  long-time task, taskpool.Priority, taskpool.executeDelayed, taskpool.executePeriodically,
   HAP, HSP, HAR, app.json5, module.json5, oh-package.json5, build-profile.json5,
   FormExtensionAbility, WorkSchedulerExtensionAbility, ServiceExtensionAbility,
   sys.symbol, SymbolGlyph, OHPM, ohpm, ArkCompiler, Cangjie,
@@ -31,24 +42,28 @@ description: >
   arkxtest, @ohos/hypium, JsUnit, UiTest, Driver, ON,
   $r(), $rawfile(), Resource, getContext,
   systemMaterialEffect, hdsMaterial, MaterialType, MaterialLevel,
-  backgroundBlurStyle, BlurStyle, foregroundBlurStyle, backdropBlur, pointLight,
+  backgroundBlurStyle, BlurStyle, foregroundBlurStyle, backdropBlur, backgroundEffect,
+  foregroundEffect, backgroundBrightness, pointLight, IlluminatedType, bloom,
+  visualEffect, backgroundFilter, foregroundFilter, uiEffect,
   HDS, HarmonyOS Design System, liquid glass, immersive light
 
-  触发关键词（中文）：鸿蒙, 鸿蒙开发, 鸿蒙应用, 鸿蒙NEXT, 华为开发者, 华为手机开发,
-  方舟语言, 方舟编译器, 方舟UI, 声明式UI, 鸿蒙组件, 鸿蒙页面,
-  状态管理, 组件通信, 页面跳转, 页面路由, 导航路由,
-  鸿蒙动画, 鸿蒙列表, 懒加载, 虚拟列表, 组件复用,
+  触发关键词（中文）：鸿蒙, 鸿蒙开发, 鸿蒙应用, 鸿蒙NEXT, 鸿蒙6.0, 鸿蒙6.0.2,
+  华为开发者, 华为手机开发, 方舟语言, 方舟编译器, 方舟UI, 声明式UI,
+  鸿蒙组件, 鸿蒙页面, 组件生命周期, 组件复用,
+  状态管理, 全局状态, StateStore, 组件通信, 页面跳转, 页面路由, 导航路由,
+  鸿蒙动画, 显式动画, 隐式动画, 转场动画, 共享元素,
+  鸿蒙列表, 懒加载, 虚拟列表, 长列表优化,
   鸿蒙网络请求, 鸿蒙数据存储, 鸿蒙文件操作, 鸿蒙数据库,
-  鸿蒙权限, 权限申请, 动态权限, 鸿蒙安全,
-  鸿蒙测试, 单元测试, UI自动化测试,
-  鸿蒙后台任务, 后台运行, 长时任务, 短时任务,
-  鸿蒙打包, 鸿蒙发布, 应用上架, 华为应用市场,
-  鸿蒙分布式, 跨设备, 流转, 多设备适配, 折叠屏, 平板适配, 一多,
+  鸿蒙权限, 权限申请, 动态权限, 鸿蒙安全, 加密等级,
+  鸿蒙测试, 单元测试, UI自动化测试, 断言,
+  鸿蒙后台任务, 后台运行, 长时任务, 短时任务, 延迟任务,
+  鸿蒙打包, 鸿蒙发布, 应用上架, 华为应用市场, 签名,
+  鸿蒙分布式, 跨设备, 流转, 多设备适配, 折叠屏, 平板适配, 一多, 响应式布局,
   原子化服务, 元服务, 服务卡片, 桌面卡片,
-  鸿蒙调试, hdc命令, 日志, 性能优化, 布局优化, 内存优化,
-  鸿蒙图标, 主题图标, 仓颉语言,
-  鸿蒙6.0, 液态玻璃, 沉浸光感, 沉浸光感视效, 通透质感, 玻璃效果, 模糊效果, 毛玻璃,
-  ArkTS和TypeScript区别, 怎么写鸿蒙应用, 鸿蒙入门, 鸿蒙教程
+  鸿蒙调试, hdc命令, 日志, 性能优化, 布局优化, 内存优化, 崩溃, 卡顿, ANR,
+  鸿蒙图标, 主题图标, 仓颉语言, 并发, 多线程, 任务池, 工作线程,
+  液态玻璃, 沉浸光感, 沉浸光感视效, 通透质感, 玻璃效果, 模糊效果, 毛玻璃, 点光源,
+  ArkTS和TypeScript区别, 怎么写鸿蒙应用, 鸿蒙入门, 鸿蒙教程, 鸿蒙最佳实践
 ---
 
 # HarmonyOS (鸿蒙) Development
