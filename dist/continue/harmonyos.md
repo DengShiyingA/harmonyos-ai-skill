@@ -1,7 +1,7 @@
 
 # HarmonyOS (鸿蒙) Development
 
-Covers HarmonyOS NEXT / HarmonyOS 6.0 (API 12+) native app development — the Huawei mobile OS family that runs independently of Android (AOSP-free since HarmonyOS NEXT, released 2024). Primary language is **ArkTS** (a strict, statically-checked superset of TypeScript) and the primary UI framework is **ArkUI** (declarative, state-driven). HarmonyOS 6.0 adds system-level "Immersive Light Perception" visual effects (液态玻璃/沉浸光感视效).
+Covers HarmonyOS 6.0.2(22) / HarmonyOS NEXT native app development — the Huawei mobile OS family that runs independently of Android (AOSP-free since HarmonyOS NEXT, released 2024). Primary language is **ArkTS** (a strict, statically-checked superset of TypeScript) and the primary UI framework is **ArkUI** (declarative, state-driven). HarmonyOS 6.0 adds system-level "Immersive Light Perception" visual effects (液态玻璃/沉浸光感视效).
 
 ## When to use this skill
 
@@ -17,15 +17,15 @@ Covers HarmonyOS NEXT / HarmonyOS 6.0 (API 12+) native app development — the H
 
 | Item | Value |
 |---|---|
-| OS | HarmonyOS NEXT (Pure HarmonyOS, AOSP-free) |
+| OS | **HarmonyOS 6.0.2(22)** (current stable, Pure HarmonyOS, AOSP-free) |
 | Language | **ArkTS** (primary), **Cangjie** (beta), C/C++ via NAPI |
 | UI framework | **ArkUI** declarative (ArkUI-X for cross-platform) |
 | Compiler | **ArkCompiler** — AOT to native machine code; LiteActor concurrency |
 | Package manager | **ohpm** — `oh-package.json5`; registry at DevEco Service (OHPM Central) |
-| IDE | **DevEco Studio** (IntelliJ-based) |
+| IDE | **DevEco Studio 6.0.2 Release** (Hvigor 6.22.x, IntelliJ-based) |
 | App model | **Stage model** (FA model is legacy — don't use in new apps) |
-| Packaging | HAP (entry/feature), HSP (shared package), HAR (static archive) |
-| Min API | API 9 for Stage model; API 12+ for HarmonyOS NEXT features |
+| Packaging | HAP (entry/feature), HSP (shared package), HAR (static archive), atomic .app |
+| Recommended API | **API 20+ (strongly recommend API 22)** |
 | Sample catalog | https://developer.huawei.com/consumer/cn/samples/ |
 
 ## Project layout (Stage model)
@@ -459,6 +459,44 @@ class UserInfo {
 }
 ```
 Rules: `@ObservedV2` and `@Trace` must be used together (either alone has no effect). Only `@Trace`-decorated properties participate in UI rendering.
+
+### StateStore — global state management (2026, officially recommended for mid-large apps)
+
+Separates state logic from UI components entirely. Works with `@ObservedV2` + `@Trace`.
+
+```ts
+import { StateStore } from '@kit.ArkUI';
+
+@ObservedV2
+class CounterStore {
+  @Trace count: number = 0;
+
+  increment(): void {
+    this.count++;
+  }
+}
+
+// Create global store (do this once, e.g. in EntryAbility or top-level)
+const counterStore = StateStore.createStore(new CounterStore());
+
+// In any component — read state
+@Entry
+@Component
+struct CounterPage {
+  build() {
+    Column() {
+      Text(`Count: ${counterStore.getState().count}`)
+      Button('Add').onClick(() => {
+        counterStore.getState().increment();
+      })
+    }
+  }
+}
+```
+
+**When to use:** Multiple pages/components share the same state; state logic is complex; need thread-safe updates (TaskPool workers can safely update StateStore).
+
+Docs: https://developer.huawei.com/consumer/cn/doc/best-practices/bpta-global-state-management-state-store
 
 ### Builders, styles, extends
 
@@ -1097,7 +1135,16 @@ await taskpool.execute(task, taskpool.Priority.HIGH);
 // Delayed and periodic
 taskpool.executeDelayed(heavyCalc, 2000, 42);      // after 2s
 taskpool.executePeriodically(heavyCalc, 5000, 42);  // every 5s
+
+// TaskGroup — execute multiple tasks as a group
+const group = new taskpool.TaskGroup();
+group.addTask(heavyCalc, 10);
+group.addTask(heavyCalc, 20);
+group.addTask(heavyCalc, 30);
+const results = await taskpool.execute(group);  // returns array of results
 ```
+
+**Long-time tasks:** async code (Promise/IO) in TaskPool has NO time limit (only CPU-bound sync code is capped at 3 minutes). HarmonyOS 6.0 officially supports long-running async tasks in TaskPool.
 
 ### @Sendable — shared-heap reference passing
 Objects on SharedHeap (process-level, all threads can access) — **100x faster** than serialization for 1MB data.
@@ -1297,4 +1344,8 @@ Portal: https://developer.huawei.com/consumer/cn/codelabsPortal/serviceTypes
 - App review policy: https://developer.huawei.com/consumer/cn/doc/app/50000
 - Meta-service review: https://developer.huawei.com/consumer/cn/doc/app/50129
 - Cangjie beta: https://developer.huawei.com/consumer/cn/activityDetail/cangjie-beta
+- Doc change log: https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/doc-updates
+- API Diff (6.0.2): https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/apidiff-602
+- Release overview (6.0): https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-600
+- StateStore best practice: https://developer.huawei.com/consumer/cn/doc/best-practices/bpta-global-state-management-state-store
 - ArkCompiler: https://developer.huawei.com/consumer/cn/arkcompiler
