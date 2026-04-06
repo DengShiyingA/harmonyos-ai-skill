@@ -29,7 +29,10 @@ description: >
   backgroundTaskManager, requestSuspendDelay, startBackgroundRunning, workScheduler,
   abilityAccessCtrl, requestPermissionsFromUser, HUKS,
   arkxtest, @ohos/hypium, JsUnit, UiTest, Driver, ON,
-  $r(), $rawfile(), Resource, getContext
+  $r(), $rawfile(), Resource, getContext,
+  systemMaterialEffect, hdsMaterial, MaterialType, MaterialLevel,
+  backgroundBlurStyle, BlurStyle, foregroundBlurStyle, backdropBlur, pointLight,
+  HDS, HarmonyOS Design System, liquid glass, immersive light
 
   触发关键词（中文）：鸿蒙, 鸿蒙开发, 鸿蒙应用, 鸿蒙NEXT, 华为开发者, 华为手机开发,
   方舟语言, 方舟编译器, 方舟UI, 声明式UI, 鸿蒙组件, 鸿蒙页面,
@@ -44,12 +47,13 @@ description: >
   原子化服务, 元服务, 服务卡片, 桌面卡片,
   鸿蒙调试, hdc命令, 日志, 性能优化, 布局优化, 内存优化,
   鸿蒙图标, 主题图标, 仓颉语言,
+  鸿蒙6.0, 液态玻璃, 沉浸光感, 沉浸光感视效, 通透质感, 玻璃效果, 模糊效果, 毛玻璃,
   ArkTS和TypeScript区别, 怎么写鸿蒙应用, 鸿蒙入门, 鸿蒙教程
 ---
 
 # HarmonyOS (鸿蒙) Development
 
-Covers HarmonyOS NEXT (API 12+) native app development — the Huawei mobile OS family that runs independently of Android (AOSP-free since HarmonyOS NEXT, released 2024). Primary language is **ArkTS** (a strict, statically-checked superset of TypeScript) and the primary UI framework is **ArkUI** (declarative, state-driven).
+Covers HarmonyOS NEXT / HarmonyOS 6.0 (API 12+) native app development — the Huawei mobile OS family that runs independently of Android (AOSP-free since HarmonyOS NEXT, released 2024). Primary language is **ArkTS** (a strict, statically-checked superset of TypeScript) and the primary UI framework is **ArkUI** (declarative, state-driven). HarmonyOS 6.0 adds system-level "Immersive Light Perception" visual effects (液态玻璃/沉浸光感视效).
 
 ## When to use this skill
 
@@ -353,6 +357,60 @@ Text('Hello')
 Image($r('app.media.photo')).geometryTransition('picture')
 // Wrap state change in animateTo
 this.getUIContext()?.animateTo({ duration: 300 }, () => { this.isExpanded = !this.isExpanded })
+```
+
+### HarmonyOS 6.0 visual effects (沉浸光感视效 / 液态玻璃)
+
+HarmonyOS 6.0 introduces system-level "Immersive Light Perception" visual effects (commonly called "Liquid Glass"). These are primarily system UI features (Control Center, Notifications) but developers can achieve similar effects through ArkUI attributes.
+
+**systemMaterialEffect (HDS material system):**
+```ts
+// Apply adaptive material effect to a container (透过质感)
+Column() {
+  // content
+}
+.systemMaterialEffect({
+  materialType: hdsMaterial.MaterialType.ADAPTIVE,
+  materialLevel: hdsMaterial.MaterialLevel.ADAPTIVE
+})
+```
+
+**backgroundBlurStyle (background blur):**
+```ts
+Column() { /* content */ }
+  .backgroundBlurStyle(BlurStyle.Thin)        // light blur
+  // or: BlurStyle.Regular | BlurStyle.Thick | BlurStyle.BACKGROUND_THIN
+  //     BlurStyle.BACKGROUND_REGULAR | BlurStyle.BACKGROUND_THICK
+  //     BlurStyle.BACKGROUND_ULTRA_THICK
+```
+
+**foregroundBlurStyle (foreground blur):**
+```ts
+Image($r('app.media.photo'))
+  .foregroundBlurStyle(BlurStyle.Thin)
+```
+
+**backdropBlur / blur (numeric blur):**
+```ts
+Column() { /* content */ }
+  .backdropBlur(20)   // backdrop blur radius in px
+  .blur(10)           // element blur radius
+```
+
+**Point light effect:**
+```ts
+Column() { /* content */ }
+  .pointLight({
+    lightSource: { positionX: '50%', positionY: '50%', intensity: 1.0 },
+    illuminated: PointLightIlluminatedType.BORDER
+  })
+```
+
+**System setting:** Users enable via Settings → Desktop & Personalization → Desktop Settings → Immersive Light Effect (强/均衡/弱 three levels). App developers simulate similar effects using the attributes above.
+
+**Key imports:**
+```ts
+import { hdsMaterial } from '@kit.ArkUI';  // or specific HDS module
 ```
 
 ### State-management decorators

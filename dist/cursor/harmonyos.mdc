@@ -11,7 +11,7 @@ alwaysApply: false
 
 # HarmonyOS (鸿蒙) Development
 
-Covers HarmonyOS NEXT (API 12+) native app development — the Huawei mobile OS family that runs independently of Android (AOSP-free since HarmonyOS NEXT, released 2024). Primary language is **ArkTS** (a strict, statically-checked superset of TypeScript) and the primary UI framework is **ArkUI** (declarative, state-driven).
+Covers HarmonyOS NEXT / HarmonyOS 6.0 (API 12+) native app development — the Huawei mobile OS family that runs independently of Android (AOSP-free since HarmonyOS NEXT, released 2024). Primary language is **ArkTS** (a strict, statically-checked superset of TypeScript) and the primary UI framework is **ArkUI** (declarative, state-driven). HarmonyOS 6.0 adds system-level "Immersive Light Perception" visual effects (液态玻璃/沉浸光感视效).
 
 ## When to use this skill
 
@@ -315,6 +315,60 @@ Text('Hello')
 Image($r('app.media.photo')).geometryTransition('picture')
 // Wrap state change in animateTo
 this.getUIContext()?.animateTo({ duration: 300 }, () => { this.isExpanded = !this.isExpanded })
+```
+
+### HarmonyOS 6.0 visual effects (沉浸光感视效 / 液态玻璃)
+
+HarmonyOS 6.0 introduces system-level "Immersive Light Perception" visual effects (commonly called "Liquid Glass"). These are primarily system UI features (Control Center, Notifications) but developers can achieve similar effects through ArkUI attributes.
+
+**systemMaterialEffect (HDS material system):**
+```ts
+// Apply adaptive material effect to a container (透过质感)
+Column() {
+  // content
+}
+.systemMaterialEffect({
+  materialType: hdsMaterial.MaterialType.ADAPTIVE,
+  materialLevel: hdsMaterial.MaterialLevel.ADAPTIVE
+})
+```
+
+**backgroundBlurStyle (background blur):**
+```ts
+Column() { /* content */ }
+  .backgroundBlurStyle(BlurStyle.Thin)        // light blur
+  // or: BlurStyle.Regular | BlurStyle.Thick | BlurStyle.BACKGROUND_THIN
+  //     BlurStyle.BACKGROUND_REGULAR | BlurStyle.BACKGROUND_THICK
+  //     BlurStyle.BACKGROUND_ULTRA_THICK
+```
+
+**foregroundBlurStyle (foreground blur):**
+```ts
+Image($r('app.media.photo'))
+  .foregroundBlurStyle(BlurStyle.Thin)
+```
+
+**backdropBlur / blur (numeric blur):**
+```ts
+Column() { /* content */ }
+  .backdropBlur(20)   // backdrop blur radius in px
+  .blur(10)           // element blur radius
+```
+
+**Point light effect:**
+```ts
+Column() { /* content */ }
+  .pointLight({
+    lightSource: { positionX: '50%', positionY: '50%', intensity: 1.0 },
+    illuminated: PointLightIlluminatedType.BORDER
+  })
+```
+
+**System setting:** Users enable via Settings → Desktop & Personalization → Desktop Settings → Immersive Light Effect (强/均衡/弱 three levels). App developers simulate similar effects using the attributes above.
+
+**Key imports:**
+```ts
+import { hdsMaterial } from '@kit.ArkUI';  // or specific HDS module
 ```
 
 ### State-management decorators
