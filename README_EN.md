@@ -1,12 +1,12 @@
 <div align="center">
 
-[English](./README_EN.md) | **简体中文**
+**English** | [简体中文](./README.md)
 
 # 🧠 HarmonyOS AI Skills
 
-### 鸿蒙开发知识包 · 让 11+ AI 编程工具真正"懂"鸿蒙
+### A HarmonyOS NEXT (鸿蒙) knowledge pack for 11+ AI coding assistants
 
-*"让 AI 像熟读华为文档的工程师一样，帮你写 ArkTS / ArkUI"*
+*"Make your AI write ArkTS / ArkUI like an engineer who's read every Huawei doc."*
 
 [![License](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
 [![HarmonyOS](https://img.shields.io/badge/HarmonyOS-NEXT-black)](https://developer.huawei.com/consumer/cn/)
@@ -20,67 +20,60 @@
 
 <br/>
 
-**用 Cursor 写鸿蒙，AI 给你输出 React？**
-**让 Claude 改 `module.json5`，它写成 `package.json`？**
-**问 Copilot `@ObjectLink` 咋用，它说"这 API 不存在"？**
+**Ask Cursor to write HarmonyOS — it hands you React.**
+**Ask Claude to edit `module.json5` — it writes `package.json`.**
+**Ask Copilot about `@ObjectLink` — it says "that API doesn't exist."**
 
-问题不在 AI —— 在于没人给它喂过鸿蒙知识。
+The problem isn't the AI — it's that no one's ever fed it HarmonyOS knowledge.
 
-**所以我喂了。一份 Markdown 源文件，自动产出 11+ AI 工具的配置。**
+**So I did. One Markdown source → drop-in configs for 11+ AI tools.**
 
 <br/>
 
-[🚀 安装](#installation) · [📖 知识内容](#whats-inside-the-knowledge) · [🛠️ 支持的工具](#supported-ai-tools) · [✅ 验证效果](#verifying-it-works)
+[🚀 Install](#installation) · [📖 What's Inside](#whats-inside-the-knowledge) · [🛠️ Supported Tools](#supported-ai-tools) · [✅ Verify It Works](#verifying-it-works)
 
 </div>
 
 ---
 
-## ⚡ 快速开始（Claude Code，30 秒）
+## ⚡ Quick start (Claude Code, 30 seconds)
 
 ```bash
 git clone https://github.com/DengShiyingA/harmonyos-ai-skills.git ~/src/harmonyos-ai-skills
 mkdir -p ~/.claude/skills
 ln -s ~/src/harmonyos-ai-skills/harmonyos-development ~/.claude/skills/harmonyos-development
-# 重启 Claude Code，然后问："What skills are available?"
+# Restart Claude Code, then ask: "What skills are available?"
 ```
 
-用其他工具？查看[下方完整安装指南](#installation)。
+Using a different tool? See [all install options below](#installation).
 
 ---
 
-只维护一份知识源文件 [`harmonyos-development/SKILL.md`](./harmonyos-development/SKILL.md)，即可自动产出所有 AI 工具的配置文件。
+Write the knowledge once — [`harmonyos-development/SKILL.md`](./harmonyos-development/SKILL.md) — and install it into every major AI coding tool via pre-built drop-in files.
 
 <details>
-<summary><b>🤔 什么是 "skill"（技能包）？</b>（点击展开）</summary>
+<summary><b>🤔 What is a "skill"?</b> (click to expand)</summary>
 
-Skill 是一段领域知识（Markdown 格式），AI 编程工具会在对话时自动加载为背景上下文。安装后，AI 就"知道"了这个领域——它会给出符合 HarmonyOS 规范的回答，而不是泛泛的 TypeScript / React 建议。不同工具叫法不同（skills、rules、instructions、system prompt），但原理一样：**额外文本被插入到模型的上下文中**。
+A skill is a chunk of domain knowledge (in Markdown) that an AI coding tool loads as background context when you chat with it. Once installed, the AI "knows" the domain — it will give you HarmonyOS-correct answers instead of generic TypeScript / React advice. Different tools call them different things (skills, rules, instructions, system prompt), but they all work the same way: **extra text prepended to the model's context**.
 
 </details>
 
-**依赖：** 只需 `git` 和 `curl`（或直接复制粘贴）。无其他依赖。
+**Requirements:** `git` and `curl` (or just copy-paste for web tools). No other dependencies.
 
-## 知识包内容
+## What's inside the knowledge
 
-这份知识包教会 AI 读写、审查和调试 HarmonyOS NEXT 原生应用所需的一切（约 1200 行密集、可操作的知识）：
+The skill teaches the AI everything needed to read, write, review, and debug HarmonyOS NEXT native apps:
 
-- **Language & framework** — ArkTS strictness rules, naming conventions, 10 high-performance coding rules (const, TypedArrays, sparse arrays, closures, caching), coding style guide
-- **App architecture** — Stage model: UIAbility, ExtensionAbility, AbilityStage, WindowStage lifecycles; module.json5 / app.json5 configuration
-- **ArkUI components** — component lifecycle (7 callbacks + execution order), 6 layout containers (Column/Row/Stack/Flex/RelativeContainer/List) with performance comparison, `@Reusable` component reuse pattern (69% faster)
-- **State management** — V1 decorators (`@State`, `@Prop`, `@Link`, `@Provide`/`@Consume`, `@Observed` + `@ObjectLink`, `@Watch`) + V2 decorators (`@ComponentV2`, `@Local`, `@ObservedV2` + `@Trace`, `@Monitor`) with observation depth rules and performance guidance
-- **Navigation** — `Navigation` + `NavPathStack` full API (push/pop/replace/remove/query/interception), 3 display modes, `@Builder` navDestination pattern
-- **Animation** — `animateTo()`, `.animation()`, Curve enum, spring curves, `geometryTransition` shared element transitions
-- **Performance** — `LazyForEach` with IDataSource, `cachedCount`, layout nesting rules (max 3 levels), `if/else` vs `.visibility()`, `Flex` vs `Column`/`Row`
-- **HarmonyOS Kits** — 50+ Kits across 7 categories (Application Framework, Services, System, Media, Graphics, AI, DevTools) with import keys
-- **Concurrency** — TaskPool vs Worker comparison, `@Concurrent` rules, `@Sendable` shared-heap mechanism (100x faster), Task priority/groups/delayed/periodic
-- **Stability** — crash type taxonomy (JS_ERROR/CPP_CRASH/APP_FREEZE/OOM), global error handler, HiAppEvent crash subscription
-- **Background tasks** — 4 types (transient/continuous/deferred/agent reminders), 9 background modes, frequency limits
-- **Security** — 10 coding rules, permission check/request pattern, data encryption levels (EL1–EL4)
-- **Testing** — arkxtest framework (JsUnit 16+ assertions, UiTest selectors/actions), test project structure
-- **Multi-device** — responsive breakpoints (xs/sm/md/lg/xl), GridRow/GridCol, foldable support
-- **Packaging** — HAP/HSP/HAR, atomic services, distributed features (流转)
-- **Tooling** — DevEco Studio 6.x setup (hvigor config), OHPM, ArkCompiler, Cangjie (beta)
-- **Samples & references** — 10-category sample catalog, 30+ best practice URLs by topic, 10 Codelabs, training courses, 80+ verified documentation links
+- **Language & framework** — ArkTS (strict-typed TypeScript superset), ArkUI declarative UI framework
+- **App architecture** — Stage model: UIAbility, ExtensionAbility (Service / Form / WorkScheduler / InputMethod / Wallpaper / Backup …), AbilityStage, WindowStage lifecycles
+- **State management** — every decorator: `@State`, `@Prop`, `@Link`, `@Provide`/`@Consume`, `@Observed` + `@ObjectLink`, `@Watch`, `@Builder`, `@Styles`, `@Extend`, `@StorageLink`, `@LocalStorageLink`
+- **Navigation** — modern `Navigation` + `NavPathStack` API (plus legacy `router`)
+- **HarmonyOS Kits** — Ability Kit, ArkUI, ArkGraphics, Network Kit, Media Kit, Location Kit, ArkData (Preferences / RDB / Distributed KV), CoreFileKit, NotificationKit, HiAI Vision Kit, and more
+- **Packaging** — HAP (entry/feature), HSP (shared), HAR (archive); `module.json5` / `app.json5` / `oh-package.json5` configuration
+- **Advanced features** — atomic services (原子化服务 / 元服务 / 服务卡片), cross-device continuation (流转), distributed data object, one-develop-multi-deploy (一多)
+- **Samples catalog** — the official 10-category taxonomy from [developer.huawei.com/consumer/cn/samples](https://developer.huawei.com/consumer/cn/samples/) with Kit and API mapping
+- **Gotchas** — 10 of the most common mistakes (FA-vs-Stage, arrow functions for `this`, nested object reactivity, `$r()` resource paths, `build()` must be synchronous, runtime permissions, …)
+- **Tooling & publishing** — DevEco Studio, `hvigor`, `ohpm`, `hdc`, HiLog, SmartPerf / DevEco Profiler, AppGallery Connect signing & release
 
 ---
 
@@ -325,7 +318,6 @@ Other good probes:
 ```
 harmonyos-ai-skills/
 ├─ .gitignore
-├─ LICENSE
 ├─ harmonyos-development/
 │  └─ SKILL.md                          ← Source of truth. Edit only here.
 ├─ scripts/
@@ -410,7 +402,7 @@ After editing the source file, run `./scripts/build-dist.sh` to regenerate every
 - For paste-based tools (ChatGPT, DeepSeek, …), the system prompt is per-conversation; start a **new chat** after pasting.
 
 **Rule file is too long for the tool's context limit.**
-Unlikely — `SKILL.md` is ~1200 lines (~45 KB). Every listed tool accepts it. If you still hit a limit, trim sections from `dist/plain/harmonyos-knowledge.md` manually.
+Unlikely — `SKILL.md` is ~800 lines (~30 KB). Every listed tool accepts it. If you still hit a limit, trim sections from `dist/plain/harmonyos-knowledge.md` manually.
 
 **`curl` fails with 404.**
 The branch in the URL may have moved. Check `https://github.com/DengShiyingA/harmonyos-ai-skills/branches` and update `$RAW` accordingly.
