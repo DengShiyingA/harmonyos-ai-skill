@@ -2616,3 +2616,54 @@ paymentService.requestPayment(context, orderStr)
 Server flow: your server calls `/api/v2/aggr/preorder/create/app` → gets `prepayId` → builds signed `orderStr` → returns to client.
 
 Supports: Phone, Tablet, PC/2in1. China mainland only.
+
+## Core Vision Kit — OCR, face detection, subject segmentation
+
+On-device AI capabilities from `@kit.CoreVisionKit`. China mainland only, no simulator support.
+
+### Text recognition (OCR)
+
+```ts
+import { textRecognition } from '@kit.CoreVisionKit';
+
+// Initialize once (e.g., in aboutToAppear)
+await textRecognition.init();
+
+// Recognize text from PixelMap
+const visionInfo: textRecognition.VisionInfo = { pixelMap: myPixelMap };
+const result = await textRecognition.recognizeText(visionInfo, {
+  isDirectionDetectionSupported: false
+});
+console.info('OCR result:', result.value);  // full recognized text string
+
+// Release when done (e.g., in aboutToDisappear)
+await textRecognition.release();
+```
+
+Supports: Chinese (simplified/traditional), English, Japanese, Korean. Input: JPEG/PNG, 720p+ recommended.
+
+### Face detection
+
+```ts
+import { faceDetector } from '@kit.CoreVisionKit';
+
+await faceDetector.init();
+const faces: faceDetector.Face[] = await faceDetector.detect({ pixelMap: myPixelMap });
+// Each face: faceRectangle, landmark positions, euler angles, confidence
+await faceDetector.release();
+```
+
+### Subject segmentation
+
+```ts
+import { subjectSegmentation } from '@kit.CoreVisionKit';
+
+await subjectSegmentation.init();
+const result = await subjectSegmentation.doSegmentation(
+  { pixelMap: myPixelMap },
+  { maxCount: 5, enableSubjectDetails: true, enableSubjectForegroundImage: true }
+);
+// result.fullSubject.foregroundImage — PixelMap with background removed
+// result.subjectCount, result.subjectDetails[i].subjectRectangle
+await subjectSegmentation.release();
+```
