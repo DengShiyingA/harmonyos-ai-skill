@@ -1454,6 +1454,88 @@ ohpm install                      # install all from oh-package.json5
 
 OHPM Central Repository: https://developer.huawei.com/consumer/cn/deveco-service
 
+### Popular ohpm libraries
+
+**@ohos/axios** — HTTP client (familiar Axios API):
+```ts
+import axios from '@ohos/axios';
+
+const http = axios.create({
+  baseURL: 'https://api.example.com',
+  timeout: 10000,
+  headers: { 'Authorization': 'Bearer TOKEN' },
+});
+
+// Interceptors
+http.interceptors.request.use(config => {
+  config.headers['token'] = AppStorage.get('token');
+  return config;
+});
+http.interceptors.response.use(
+  response => response.data,
+  error => {
+    if (error.response?.status === 401) { /* redirect to login */ }
+    return Promise.reject(error);
+  }
+);
+
+const res = await http.get('/data', { params: { id: 1 } });
+await http.post('/user', { name: 'Tom', age: 18 });
+```
+
+**@ohos/pulltorefresh** — pull-down refresh + load-more:
+```ts
+import { PullToRefresh } from '@ohos/pulltorefresh';
+
+PullToRefresh({
+  scroller: this.scroller,
+  onRefresh: () => new Promise(resolve => {
+    this.loadData().then(() => resolve('Done'));
+  }),
+  onLoadMore: () => new Promise(resolve => {
+    this.loadMore().then(() => resolve('Done'));
+  }),
+  customList: () => { this.ListBuilder(); },
+})
+```
+
+**@ohos/lottie** — JSON animation (After Effects):
+```ts
+import lottie from '@ohos/lottie';
+
+Canvas(this.canvasCtx).width('100%').height(300)
+  .onReady(() => {
+    this.anim = lottie.loadAnimation({
+      container: this.canvasCtx, renderer: 'canvas',
+      loop: true, autoplay: true, path: 'animation.json',
+    });
+  })
+  .onDisAppear(() => { lottie.destroy(); })
+```
+
+**@ohos/imageknife** — image loading with cache/placeholder:
+```ts
+import { ImageKnife, ImageKnifeComponent, ImageKnifeOption } from '@ohos/imageknife';
+
+// Init once: ImageKnife.getInstance().init(context)
+ImageKnifeComponent({
+  imageKnifeOption: {
+    loadSrc: 'https://example.com/avatar.jpg',
+    placeholderSrc: $r('app.media.placeholder'),
+    errorholderSrc: $r('app.media.error'),
+  }
+}).width(80).height(80).borderRadius(40)
+```
+
+**dayjs** — date formatting/manipulation:
+```ts
+import dayjs from 'dayjs';
+dayjs().format('YYYY-MM-DD HH:mm:ss');
+dayjs('2024-01-01').fromNow();               // requires relativeTime plugin
+dayjs().add(7, 'day').format('YYYY-MM-DD');
+dayjs().diff(dayjs('2024-01-01'), 'day');     // days difference
+```
+
 ## Debugging & tooling
 
 - **DevEco Studio** — primary IDE, includes emulator, previewer, profiler, HiLog viewer
