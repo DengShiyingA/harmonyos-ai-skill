@@ -1463,34 +1463,69 @@ OHPM Central Repository: https://developer.huawei.com/consumer/cn/deveco-service
 
 ### Popular ohpm libraries
 
-**@ohos/axios** — HTTP client (familiar Axios API):
+**@ohos/axios** — HTTP client (`ohpm install @ohos/axios`, requires `ohos.permission.INTERNET`):
 ```ts
-import axios from '@ohos/axios';
+import axios, { AxiosResponse, AxiosError, InternalAxiosRequestConfig } from '@ohos/axios';
 
+// GET (generic response type)
+interface UserInfo { id: number; name: string }
+axios.get<UserInfo, AxiosResponse<UserInfo>, null>('/user', { params: { ID: 12345 } })
+  .then((res: AxiosResponse<UserInfo>) => console.info(res.data.name))
+  .catch((err: AxiosError) => console.error(err.message));
+
+// POST
+interface NewUser { firstName: string; lastName: string }
+axios.post<string, AxiosResponse<string>, NewUser>('/user',
+  { firstName: 'Fred', lastName: 'Flintstone' });
+
+// Create instance (recommended for project-wide use)
 const http = axios.create({
   baseURL: 'https://api.example.com',
   timeout: 10000,
-  headers: { 'Authorization': 'Bearer TOKEN' },
+  headers: { 'X-Custom-Header': 'value' },
 });
 
 // Interceptors
-http.interceptors.request.use(config => {
-  config.headers['token'] = AppStorage.get('token');
+http.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  config.headers['Authorization'] = 'Bearer ' + AppStorage.get<string>('token');
   return config;
-});
+}, (err: AxiosError) => Promise.reject(err));
+
 http.interceptors.response.use(
-  response => response.data,
-  error => {
-    if (error.response?.status === 401) { /* redirect to login */ }
-    return Promise.reject(error);
+  (res: AxiosResponse) => res,
+  (err: AxiosError) => {
+    if (err.response?.status === 401) { /* redirect to login */ }
+    return Promise.reject(err);
   }
 );
 
-const res = await http.get('/data', { params: { id: 1 } });
-await http.post('/user', { name: 'Tom', age: 18 });
+// File download
+import fs from '@ohos.file.fs';
+const filePath = getContext(this).cacheDir + '/file.jpg';
+axios({ url: 'https://example.com/file.jpg', method: 'get', filePath,
+  onDownloadProgress: (e) => {
+    console.info('Progress: ' + (e.loaded && e.total ? Math.ceil(e.loaded / e.total * 100) : 0) + '%');
+  }
+});
+
+// File upload (FormData)
+import { FormData } from '@ohos/axios';
+const form = new FormData();
+form.append('file', 'internal://cache/photo.jpg');
+axios.post<string, AxiosResponse<string>, FormData>('/upload', form, {
+  headers: { 'Content-Type': 'multipart/form-data' },
+  onUploadProgress: (e) => console.info(e.loaded + '/' + e.total),
+});
+
+// Cancel request
+const ctrl = new AbortController();
+axios.get('/slow', { signal: ctrl.signal });
+ctrl.abort();
 ```
 
-**@ohos/pulltorefresh** — pull-down refresh + load-more:
+> `responseType`: `'string'` | `'object'` | `'array_buffer'`. Mutual TLS requires API 11+.
+
+**@ohos/pulltorefresh** — pull-down refresh + load-more (placeholder, will be replaced with real README):
 ```ts
 import { PullToRefresh } from '@ohos/pulltorefresh';
 
@@ -1506,7 +1541,7 @@ PullToRefresh({
 })
 ```
 
-**@ohos/lottie** — JSON animation (After Effects):
+**@ohos/lottie** — JSON animation (placeholder, will be replaced with real README):
 ```ts
 import lottie from '@ohos/lottie';
 
@@ -1520,7 +1555,7 @@ Canvas(this.canvasCtx).width('100%').height(300)
   .onDisAppear(() => { lottie.destroy(); })
 ```
 
-**@ohos/imageknife** — image loading with cache/placeholder:
+**@ohos/imageknife** — image loading with cache/placeholder (placeholder, will be replaced with real README):
 ```ts
 import { ImageKnife, ImageKnifeComponent, ImageKnifeOption } from '@ohos/imageknife';
 
@@ -1534,7 +1569,7 @@ ImageKnifeComponent({
 }).width(80).height(80).borderRadius(40)
 ```
 
-**dayjs** — date formatting/manipulation:
+**dayjs** — date formatting/manipulation (placeholder, will be replaced with real README):
 ```ts
 import dayjs from 'dayjs';
 dayjs().format('YYYY-MM-DD HH:mm:ss');
