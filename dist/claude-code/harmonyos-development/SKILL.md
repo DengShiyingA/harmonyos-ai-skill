@@ -1,19 +1,34 @@
 ---
 name: harmonyos-development
 description: >
-  HarmonyOS 6.0.2 / NEXT (鸿蒙) development knowledge — ArkTS, ArkUI, Stage model,
-  50+ Kit APIs, state management, navigation, animation, concurrency, testing, security.
+  HarmonyOS 6.0.2 / NEXT (鸿蒙) comprehensive development knowledge — ArkTS, ArkUI,
+  Stage model, 60+ Kit APIs, UI components, state management, navigation, animation,
+  networking, data persistence, media, concurrency, testing, security, performance
+  optimization, third-party libraries. 4200+ lines, 237 sections, 105+ code examples.
 
   Trigger: HarmonyOS, ArkTS, ArkUI, .ets, DevEco Studio, Stage model, UIAbility,
   @State, @Prop, @Link, @Provide, @Observed, @ObjectLink, @ComponentV2, @ObservedV2,
   @Trace, @Monitor, StateStore, NavPathStack, LazyForEach, @Reusable, animateTo,
-  TaskPool, Worker, @Concurrent, @Sendable, module.json5, oh-package.json5, OHPM,
-  sys.symbol, HAP, HSP, relationalStore, preferences, notificationManager,
-  backgroundTaskManager, abilityAccessCtrl, arkxtest, BlurStyle, systemMaterialEffect,
-  CameraKit, cameraPicker, AudioRenderer, AudioKit, StreamUsage, ArkGuard, 代码混淆,
-  ScanKit, scanBarcode, customScan, AccountKit, continuable, onContinue, 应用接续, 扫码,
+  keyframeAnimateTo, geometryTransition, TaskPool, Worker, @Concurrent, @Sendable,
+  module.json5, oh-package.json5, OHPM, sys.symbol, HAP, HSP, Tabs, TabContent,
+  Swiper, WaterFlow, Grid, TextInput, TextArea, AlertDialog, openCustomDialog,
+  openBindSheet, bindContentCover, Refresh, swipeAction, ListItemGroup,
+  relationalStore, preferences, fileIo, DocumentViewPicker, photoAccessHelper,
+  notificationManager, backgroundTaskManager, abilityAccessCtrl, pasteboard,
+  WebSocket, connection, request.agent, startAbilityByType, expandSafeArea,
+  KeyboardAvoidMode, setPreferredOrientation, colorMode, registerFont,
+  hitTestBehavior, priorityGesture, onVisibleAreaChange, EventHub,
+  arkxtest, BlurStyle, systemMaterialEffect, ArkGuard, 代码混淆,
+  CameraKit, cameraPicker, AudioRenderer, AudioKit, AVPlayer, AVRecorder,
+  ImageKit, PixelMap, ScanKit, scanBarcode, customScan, AccountKit, PaymentKit,
+  PushKit, MapKit, ShareKit, systemShare, AppLinking, domainVerify,
+  CoreVisionKit, textRecognition, AVSessionKit, FormKit, FormExtensionAbility,
+  axios, @ohos/axios, pulltorefresh, lottie, imageknife, dayjs,
+  continuable, onContinue, 应用接续, 扫码, 深链接, 分享, 剪贴板,
   鸿蒙, 鸿蒙开发, 鸿蒙NEXT, 方舟语言, 状态管理, 导航路由, 懒加载, 组件复用,
-  鸿蒙权限, 鸿蒙测试, 液态玻璃, 沉浸光感, 折叠屏, 鸿蒙入门
+  鸿蒙权限, 鸿蒙测试, 液态玻璃, 沉浸光感, 折叠屏, 鸿蒙入门, 沉浸式, 深色模式,
+  下拉刷新, 上拉加载, 左滑删除, 瀑布流, 轮播图, 底部导航, 软键盘, 横竖屏,
+  自定义字体, 桌面快捷方式, 手势冲突, 文件选择, 网络请求, 后台下载, 弹窗
 ---
 
 # HarmonyOS (鸿蒙) Development
