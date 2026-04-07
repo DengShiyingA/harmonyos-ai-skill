@@ -41,7 +41,13 @@ printf '%s\n' "$BODY" > "$DIST/plain/harmonyos-knowledge.md"
 {
   cat <<'HDR'
 ---
-description: HarmonyOS NEXT development expert - ArkTS, ArkUI, Stage model, Kits
+description: >
+  HarmonyOS NEXT development expert — ArkTS, ArkUI, Stage model, 60+ Kit APIs,
+  UI components (Tabs/Swiper/WaterFlow/Grid/List), state management (V1/V2/StateStore),
+  navigation, animation, networking, data persistence, Camera/Audio/AVPlayer/Image Kit,
+  Scan/Account/Payment/Push/Map/Share Kit, dark mode, immersive window, keyboard,
+  gestures, permissions, testing, code obfuscation, performance optimization,
+  third-party libraries (@ohos/axios, lottie, imageknife, pulltorefresh).
 globs:
   - "**/*.ets"
   - "**/module.json5"
@@ -77,7 +83,7 @@ printf '%s\n' "$BODY" > "$DIST/gemini-cli/GEMINI.md"
 
 # 11. Universal system prompt (prepend role framing)
 {
-  echo "You are an expert HarmonyOS NEXT developer. Apply the following domain knowledge when answering HarmonyOS / ArkTS / ArkUI questions."
+  echo "You are an expert HarmonyOS NEXT developer with deep knowledge of ArkTS, ArkUI, Stage model, 60+ Kit APIs, and the HarmonyOS ecosystem. Apply the following comprehensive domain knowledge (4200+ lines, 237 sections) when answering HarmonyOS development questions."
   echo
   printf '%s\n' "$BODY"
 } > "$DIST/system-prompt/system.txt"

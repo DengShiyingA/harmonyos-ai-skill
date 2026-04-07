@@ -1,5 +1,11 @@
 ---
-description: HarmonyOS NEXT development expert - ArkTS, ArkUI, Stage model, Kits
+description: >
+  HarmonyOS NEXT development expert — ArkTS, ArkUI, Stage model, 60+ Kit APIs,
+  UI components (Tabs/Swiper/WaterFlow/Grid/List), state management (V1/V2/StateStore),
+  navigation, animation, networking, data persistence, Camera/Audio/AVPlayer/Image Kit,
+  Scan/Account/Payment/Push/Map/Share Kit, dark mode, immersive window, keyboard,
+  gestures, permissions, testing, code obfuscation, performance optimization,
+  third-party libraries (@ohos/axios, lottie, imageknife, pulltorefresh).
 globs:
   - "**/*.ets"
   - "**/module.json5"
