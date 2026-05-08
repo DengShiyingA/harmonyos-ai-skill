@@ -3,7 +3,7 @@
 
   <!-- Title -->
   <text x="640" y="50" font-size="28" font-weight="800" fill="#2d2520" text-anchor="middle">SKILL.md Knowledge Architecture</text>
-  <text x="640" y="78" font-size="15" fill="#8a7b6b" text-anchor="middle">1200+ lines · real knowledge extracted from official Huawei docs</text>
+  <text x="640" y="78" font-size="15" fill="#8a7b6b" text-anchor="middle">4200+ lines · 237 sections · real knowledge extracted from official Huawei docs</text>
 
   <!-- Center node -->
   <circle cx="640" cy="380" r="62" fill="#D97757"/>
@@ -49,7 +49,7 @@
 
   <!-- 5. Kits -->
   <rect x="80" y="480" width="290" height="105" rx="16" fill="#fff" stroke="#b8860b" stroke-width="1.5"/>
-  <text x="225" y="510" font-size="16" font-weight="700" fill="#b8860b" text-anchor="middle">50+ HarmonyOS Kits</text>
+  <text x="225" y="510" font-size="16" font-weight="700" fill="#b8860b" text-anchor="middle">60+ HarmonyOS Kits</text>
   <text x="225" y="532" font-size="12" fill="#6b5d50" text-anchor="middle">App Framework · Services · System · Media</text>
   <text x="225" y="550" font-size="12" fill="#6b5d50" text-anchor="middle">Graphics · AI · DevTools · all import keys</text>
   <text x="225" y="568" font-size="12" fill="#6b5d50" text-anchor="middle">PhotoViewPicker · CoreSpeechKit ASR</text>
