@@ -23,8 +23,11 @@ description: >
   ImageKit, PixelMap, ScanKit, scanBarcode, customScan, AccountKit, PaymentKit,
   PushKit, MapKit, ShareKit, systemShare, AppLinking, domainVerify,
   CoreVisionKit, textRecognition, AVSessionKit, FormKit, FormExtensionAbility,
+  WeatherServiceKit, weatherService, PenKit, HandwriteController,
+  AppStorageV2, PersistenceV2, @Local, @Param, @Event, @Once, @Provider, @Consumer,
   axios, @ohos/axios, pulltorefresh, lottie, imageknife, dayjs,
-  continuable, onContinue, 应用接续, 扫码, 深链接, 分享, 剪贴板,
+  API 22, API 23, API 24, HarmonyOS 6.1, HarmonyOS 6.1.1, Follow the Person, anchorPosition,
+  continuable, onContinue, 应用接续, 扫码, 深链接, 分享, 剪贴板, 天气, 手写笔,
   鸿蒙, 鸿蒙开发, 鸿蒙NEXT, 方舟语言, 状态管理, 导航路由, 懒加载, 组件复用,
   鸿蒙权限, 鸿蒙测试, 液态玻璃, 沉浸光感, 折叠屏, 鸿蒙入门, 沉浸式, 深色模式,
   下拉刷新, 上拉加载, 左滑删除, 瀑布流, 轮播图, 底部导航, 软键盘, 横竖屏,
@@ -721,15 +724,21 @@ Arrays of `@Observed` instances require `@ObjectLink` in the row component — p
 - Avoid `@StorageLink` for frequently-changing data — global state changes propagate to ALL subscribers
 - **Observation depth (V1):** `@State`/`@Prop`/`@Link` observe ONLY first-level properties. Nested changes are NOT detected. Array: only push/splice/reassign/length, NOT item mutations.
 
-### V2 state decorators (API 12+)
+### V2 state decorators (API 12+, **stable since API 23** — recommended for new code)
+
+> V2 decorators have **graduated from experimental to stable** as of HarmonyOS 6.1 (API 23). Official recommendation: migrate to V2 for new projects.
 
 | V1 | V2 replacement | Change |
 |---|---|---|
 | `@Component` | `@ComponentV2` | Clearer semantics |
 | `@State` | `@Local` | Cannot be initialized externally — internal state only |
+| `@Prop` | `@Param` + `@Once` | Read-only inputs; `@Once` for one-time init |
+| `@Link` | `@Param` + `@Event` | Two-way: input via `@Param`, output via callback `@Event` |
 | `@Observed` + `@ObjectLink` | `@ObservedV2` + `@Trace` | **Deep observation** across multiple nested levels |
 | `@Watch` | `@Monitor('prop')` | More precise deep listener |
 | `AppStorage` | `AppStorageV2` | Unified with `@ObservedV2` + `@Trace` |
+| (none) | `PersistenceV2` | Persistent storage with V2 observation; auto-saved to disk |
+| `@Provide` / `@Consume` | `@Provider()` / `@Consumer()` | Renamed; same semantics |
 
 ```ts
 @ObservedV2
@@ -740,6 +749,42 @@ class UserInfo {
 }
 ```
 Rules: `@ObservedV2` and `@Trace` must be used together (either alone has no effect). Only `@Trace`-decorated properties participate in UI rendering.
+
+**AppStorageV2 — global reactive state:**
+```ts
+import { AppStorageV2 } from '@kit.ArkUI';
+
+@ObservedV2
+class UserState { @Trace name: string = 'Guest'; }
+
+// Connect (creates if not exists)
+const user = AppStorageV2.connect(UserState, 'user', () => new UserState())!;
+
+// In component
+@ComponentV2
+struct Header {
+  user: UserState = AppStorageV2.connect(UserState, 'user')!;
+  build() { Text(this.user.name) }
+}
+```
+
+**PersistenceV2 — auto-persisted state (survives app restart):**
+```ts
+import { PersistenceV2, Type } from '@kit.ArkUI';
+
+@ObservedV2
+class Settings {
+  @Trace @Type(String) theme: string = 'light';
+  @Trace @Type(Number) fontSize: number = 14;
+}
+
+// Connect — auto-loads from disk if exists, writes on change
+const settings = PersistenceV2.connect(Settings, 'app_settings', () => new Settings())!;
+
+// Optional: error/success callback
+PersistenceV2.notifyOnError((key, reason, msg) => { console.error(reason, msg); });
+```
+> `@Type` decorator is required for PersistenceV2 to serialize correctly.
 
 ### StateStore — global state management (2026, officially recommended for mid-large apps)
 
@@ -809,7 +854,7 @@ Column() { Label('x') } .Card()
 }
 ```
 
-The older `router` module (`@ohos.router`) still works but `Navigation` + `NavPathStack` is the modern API for HarmonyOS NEXT.
+The older `router` module (`@ohos.router`) still works but **is being phased out** — `Navigation` + `NavPathStack` is the official replacement since API 12+. Huawei publishes a [transition guide](https://device.harmonyos.com/en/docs/apiref/harmonyos-guides/arkts-router-to-navigation) for migrating from router to Navigation. For new projects, always use Navigation; for legacy code, migrate when convenient.
 
 **NavPathStack full API:**
 ```ts
@@ -895,6 +940,10 @@ import { hilog } from '@kit.PerformanceAnalysisKit';
 | Push Kit | `PushKit` | Push notification delivery service |
 | Scan Kit | `ScanKit` | QR/barcode scanning |
 | Share Kit | `ShareKit` | Cross-app content sharing |
+| Weather Service Kit | `WeatherServiceKit` | Weather data (current/daily/hourly/alerts/indices/tides) |
+| Pen Kit | `Penkit` | Stylus / handwriting component (M-Pencil devices) |
+| Wear Engine | `WearEngine` | Phone↔watch communication, device discovery |
+| Health Service Kit | `HealthServiceKit` | Health data services |
 
 **系统 System**
 
@@ -2096,6 +2145,37 @@ const addresses = await geoLocationManager.getAddressesFromLocation({
 
 // Build readable location string from GeoAddress fields:
 // administrativeArea (省) → subAdministrativeArea (市) → locality (区) → subLocality → placeName
+```
+
+## Weather Service Kit — weather data API
+
+> Requires `ohos.permission.LOCATION` (or `APPROXIMATELY_LOCATION`) if using device location.
+
+```ts
+import { weatherService } from '@kit.WeatherServiceKit';
+
+const weatherRequest: weatherService.WeatherRequest = {
+  location: { latitude: 39.9042, longitude: 116.4074 },   // Beijing
+  limitedDatasets: [
+    weatherService.Dataset.CURRENT,    // current conditions
+    weatherService.Dataset.DAILY,      // daily forecast
+    weatherService.Dataset.HOURLY,     // hourly forecast
+    weatherService.Dataset.ALERTS,     // severe weather alerts
+    weatherService.Dataset.INDICES,    // life indices (UV, air quality...)
+    weatherService.Dataset.TIDES,      // coastal tides
+    weatherService.Dataset.MINUTE,     // minute-level precipitation
+  ],
+};
+
+try {
+  const weather = await weatherService.getWeather(weatherRequest);
+  // weather.currentWeather.temperature, .humidity, .conditionCode, ...
+  // weather.dailyForecast?.days[] (each: tempMax/tempMin/precipitation/sunrise/sunset)
+  // weather.hourlyForecast?.hours[]
+  // weather.weatherAlerts?.alerts[] (severity, summary)
+} catch (err) {
+  console.error('Weather fetch failed:', err);
+}
 ```
 
 ## Notification Kit (notificationManager)

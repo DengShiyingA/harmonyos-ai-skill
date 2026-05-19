@@ -94,6 +94,7 @@ The skill teaches the AI everything needed to read, write, review, and debug Har
 - **Cross-device** — app continuation (onContinue/onCreate data migration), cross-module resource access (HAR/HSP)
 - **Engineering quality** — security coding rules + network security config (HTTPS/cert pinning), code obfuscation (ArkGuard), arkxtest testing (JsUnit + UiTest), 18 common gotchas
 - **Third-party libraries** — @ohos/axios (HTTP client), @ohos/pulltorefresh, @ohos/lottie (JSON animation), @ohos/imageknife (image caching), dayjs (date utils)
+- **Latest version support** — HarmonyOS 6.1 (API 23, stable 2026/4) / 6.1.1 (API 24, beta) — Navigation routing stack binding, Menu anchorPosition, UDMF/drag/crypto C APIs, relationalStore sendable enhancement, AI super frame, Camera Kit "Follow the Person" subject tracking, AppStorageV2, PersistenceV2, Weather Service Kit
 - **Multi-device** — responsive breakpoints (xs/sm/md/lg/xl), GridRow/GridCol, foldable support
 - **Packaging & tooling** — HAP/HSP/HAR, atomic services, DevEco Studio 6.x (hvigor), OHPM, ArkCompiler
 
