@@ -1,22 +1,61 @@
 
 # HarmonyOS (鸿蒙) Development
 
-Covers HarmonyOS 6.0.2 (API 22) / HarmonyOS NEXT native app development — the Huawei mobile OS family that runs independently of Android (AOSP-free since HarmonyOS NEXT, released 2024). Primary language is **ArkTS** (a strict, statically-checked superset of TypeScript) and the primary UI framework is **ArkUI** (declarative, state-driven). HarmonyOS 6.0 adds system-level "Immersive Light Perception" visual effects (液态玻璃/沉浸光感视效).
+Covers HarmonyOS 6.1 (API 23, stable) / 6.1.1 (API 24, beta) / NEXT native app development — the Huawei mobile OS family that runs independently of Android (AOSP-free since HarmonyOS NEXT, released 2024). Primary language is **ArkTS** (a strict, statically-checked superset of TypeScript) and the primary UI framework is **ArkUI** (declarative, state-driven). HarmonyOS 6.0+ adds system-level "Immersive Light Perception" visual effects (液态玻璃/沉浸光感视效); HarmonyOS 6.1.1 introduces "Follow the Person" camera tracking and AI super frame.
 
 ## Platform snapshot
 
 | Item | Value |
 |---|---|
-| OS | **HarmonyOS 6.0.2(22)** (current stable, Pure HarmonyOS, AOSP-free) |
+| OS | **HarmonyOS 6.1** (stable, released 2026/04/20, API 23). **HarmonyOS 6.1.1 (API 24)** in developer beta. Pure HarmonyOS, AOSP-free |
 | Language | **ArkTS** (primary), **Cangjie** (beta), C/C++ via NAPI |
 | UI framework | **ArkUI** declarative (ArkUI-X for cross-platform) |
 | Compiler | **ArkCompiler** — AOT to native machine code; LiteActor concurrency |
 | Package manager | **ohpm** — `oh-package.json5`; registry at DevEco Service (OHPM Central) |
-| IDE | **DevEco Studio 6.0.2 Release** (Hvigor 6.22.x, IntelliJ-based) |
+| IDE | **DevEco Studio 6.1+** (supports API 23/24, Hvigor 6.22+, IntelliJ-based) |
 | App model | **Stage model** (FA model is legacy — don't use in new apps) |
 | Packaging | HAP (entry/feature), HSP (shared package), HAR (static archive), atomic .app |
-| Recommended API | **API 20+ (strongly recommend API 22)** |
+| Recommended API | **API 22+ (use API 23 for new projects; API 24 for camera/AI-heavy apps)** |
 | Sample catalog | https://developer.huawei.com/consumer/cn/samples/ |
+
+**Release timeline (recent):**
+- HarmonyOS 6.0.1(21) — 2025/11/25 (initial stable with Mate 80 series)
+- HarmonyOS 6.0.2(22) — 2026/01/23 (incremental update)
+- HarmonyOS 6.0.0.328 Pollen Beta(23) — 2026/02/28 (closed beta, 25 models)
+- HarmonyOS 6.1(23) — 2026/04/20 (stable general release)
+- HarmonyOS 6.1.1(24) Beta 1 — 2026/05 (developer beta, camera/AI focus)
+
+### What's new in API 23 (HarmonyOS 6.1)
+
+**ArkUI enhancements:**
+- `Navigation` supports binding the routing stack to the component itself and specifying a `NavDestination` as the navigation bar (home page) — no more separate root container needed
+- `Menu` adds `anchorPosition` property: control popup position relative to upper-left of anchor with horizontal/vertical offsets
+- `Image` component improved SVG parsing capabilities
+- Batch of new C APIs for attribute styles (Native side)
+
+**New C-side capabilities (Native/NAPI):**
+- UDMF (Unified Data Management Framework) C APIs
+- Component drag-and-drop C APIs
+- Cryptographic algorithm C APIs
+
+**Data:**
+- `relationalStore` enhanced `sendable` function — better cross-thread data passing
+
+**Graphics & AI:**
+- AI super frame feature in Graphics Accelerate Kit (frame interpolation for smoother animations)
+
+**ArkWeb:** further capability enhancements (intercept/cookies)
+
+### What's new in API 24 (HarmonyOS 6.1.1 Beta)
+
+- **Camera Kit "Follow the Person"** — automatic camera tracking API that keeps a person centered in frame via real-time crop/zoom. Useful for video calls, workout recording, vlogging:
+  ```ts
+  // Conceptual API — full signature in official docs
+  cameraSession.enableSubjectTracking(camera.TrackingMode.PERSON);
+  ```
+- **Delayed preview output** — add preview directly to data stream instead of standard preview path
+- **DevEco Studio** supports API 24 projects, C++ code/resource file modifications, expanded AppFreeze log parsing
+- **ComMemory template** — new template for memory management in camera/AI apps
 
 ## Project layout (Stage model)
 
