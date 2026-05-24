@@ -154,36 +154,41 @@ The two files differ only slightly: `plain/` is the raw Markdown; `system-prompt
 
 ## Installation
 
-All `curl` commands below use a shell variable `$RAW` — run this once in your terminal first (it stays set for the rest of your session):
+All `curl` commands below use a shell variable `$RAW` — **run this once in every new terminal before the commands**:
 
 ```bash
 export RAW=https://raw.githubusercontent.com/DengShiyingA/harmonyos-ai-skill/main
 ```
+
+> **Windows PowerShell users:** use `$env:RAW = "..."` and replace `curl -o foo` with `Invoke-WebRequest -Uri "..." -OutFile foo`.
+> **HOME path differences:** macOS/Linux uses `~`; Windows PowerShell uses `$HOME`; CMD uses `%USERPROFILE%`.
 
 ### Claude Code CLI
 
 Pick **one** of the three options below:
 
 ```bash
-# Option A — quick copy (you get a static snapshot)
+# Option A — quick copy (simplest, static snapshot)
 git clone https://github.com/DengShiyingA/harmonyos-ai-skill.git ~/src/harmonyos-ai-skill
 mkdir -p ~/.claude/skills
 cp -r ~/src/harmonyos-ai-skill/harmonyos-development ~/.claude/skills/
 
-# Option B — symlink (recommended: auto-updates after `git pull`)
+# Option B — symlink (recommended: auto-updates after upstream `git pull`)
 git clone https://github.com/DengShiyingA/harmonyos-ai-skill.git ~/src/harmonyos-ai-skill
 mkdir -p ~/.claude/skills
 ln -s ~/src/harmonyos-ai-skill/harmonyos-development ~/.claude/skills/harmonyos-development
 
 # Option C — project-local only (commit it so your whole team gets the skill)
-cd <your-harmonyos-project>
-mkdir -p .claude/skills
-cp -r ~/src/harmonyos-ai-skill/harmonyos-development .claude/skills/
+cd <your-harmonyos-project-root>
+mkdir -p .claude/skills/harmonyos-development
+curl -o .claude/skills/harmonyos-development/SKILL.md "$RAW/harmonyos-development/SKILL.md"
 ```
 
 After installing, **restart Claude Code**. To verify, ask it: *"What skills are available?"* — it should list `harmonyos-development`.
 
 ### Cursor
+
+> **Run from:** your HarmonyOS project root (the one with `entry/` and `module.json5`)
 
 ```bash
 # Recommended — modern glob-scoped .mdc rule
@@ -198,6 +203,8 @@ The `.mdc` rule auto-activates only when you edit `.ets`, `module.json5`, etc., 
 
 ### GitHub Copilot
 
+> **Run from:** your HarmonyOS project root
+
 ```bash
 mkdir -p .github
 curl -o .github/copilot-instructions.md "$RAW/dist/copilot/copilot-instructions.md"
@@ -207,11 +214,15 @@ Applies to Copilot Chat and inline suggestions whenever you're inside this repo.
 
 ### Windsurf / Codeium
 
+> **Run from:** your HarmonyOS project root
+
 ```bash
 curl -o .windsurfrules "$RAW/dist/windsurf/.windsurfrules"
 ```
 
 ### Continue.dev
+
+> **Run from:** your HarmonyOS project root
 
 ```bash
 mkdir -p .continue/rules
@@ -267,23 +278,23 @@ curl -o ~/.gemini/GEMINI.md "$RAW/dist/gemini-cli/GEMINI.md"
 ### Ollama / local LLMs
 
 ```bash
-# Pull any capable model first
-ollama pull qwen2.5-coder:14b
+# 1. Pull a capable model (qwen3-coder or qwen2.5-coder recommended for Chinese-heavy docs)
+ollama pull qwen3-coder
 
-# Launch with HarmonyOS system prompt baked in
-ollama run qwen2.5-coder:14b \
+# 2. One-liner launch with HarmonyOS system prompt baked in
+ollama run qwen3-coder \
   --system "$(curl -s $RAW/dist/system-prompt/system.txt)"
 ```
 
-Or bake it into a custom Modelfile:
+Or bake it into a custom Modelfile (permanently saves this "HarmonyOS expert" model):
 
 ```bash
 # 1. Download the system prompt
 curl -o system.txt "$RAW/dist/system-prompt/system.txt"
 
-# 2. Create a Modelfile (replace the SYSTEM block contents with the file you just downloaded)
+# 2. Create a Modelfile
 cat > Modelfile <<EOF
-FROM qwen2.5-coder:14b
+FROM qwen3-coder
 SYSTEM """
 $(cat system.txt)
 """
@@ -297,19 +308,22 @@ ollama run harmonyos-coder
 ### Anthropic / OpenAI / any LLM API
 
 ```python
-# Python example
+# First: pip install anthropic
 import anthropic
-client = anthropic.Anthropic()
 
-with open("dist/system-prompt/system.txt") as f:
+# Assumes you've downloaded system.txt locally
+# (curl -o system.txt "$RAW/dist/system-prompt/system.txt")
+with open("system.txt") as f:
     system_prompt = f.read()
 
+client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY from env
 response = client.messages.create(
-    model="claude-opus-4-6",
+    model="claude-opus-4-7",            # latest Opus; or claude-sonnet-4-6 / claude-haiku-4-5
     system=system_prompt,
     max_tokens=2048,
     messages=[{"role": "user", "content": "How do I make a service card in HarmonyOS?"}],
 )
+print(response.content[0].text)
 ```
 
 ---
