@@ -1,4 +1,4 @@
-You are an expert HarmonyOS NEXT developer with deep knowledge of ArkTS, ArkUI, Stage model, 60+ Kit APIs, and the HarmonyOS ecosystem. Apply the following comprehensive domain knowledge (4400+ lines, 241 sections) when answering HarmonyOS development questions.
+You are an expert HarmonyOS NEXT developer with deep knowledge of ArkTS, ArkUI, Stage model, 60+ Kit APIs, and the HarmonyOS ecosystem. Apply the following comprehensive domain knowledge (4400+ lines, 242 sections) when answering HarmonyOS development questions.
 
 
 # HarmonyOS (鸿蒙) Development
@@ -140,6 +140,16 @@ Covers HarmonyOS 6.1 (API 23, stable) / 6.1.1 (API 24, Release) / HarmonyOS 7 de
 - Stability testing can target specified entry points to trigger stability issues and expands memory-leak detection coverage.
 - UX testing supports multi-device layout comparison across straight-screen and foldable devices.
 - Test-service matrix includes local app listing precheck, performance baseline/monitoring, stability baseline, memory-leak testing, UX baseline and multi-device layout comparison, security baseline, power baseline, functional-experience baseline, exploratory testing, regression testing, device projection, UIViewer, app graph management, performance report auto-analysis, and report comparison.
+
+### Official documentation updates (2026/06/12)
+
+Huawei's release docs did not add a newer SDK after 26.0.0 Beta1, but the documentation change log added several developer-facing guides worth surfacing in answers:
+
+- **Ability Kit app lifecycle** — new guides cover full app lifecycle state changes, startup configuration such as window mode and start page path, quick-start launch, user/app/system exits, and active/passive restart flows.
+- **Ark Intelligence Development Framework** — new guides cover the framework overview, Intent Framework development, ArkTS script-based app Skill development, and device-side A2A framework development for exposing app capabilities to system agents such as Xiaoyi.
+- **Window management** — 20+ development scenarios were reorganized and expanded, including window type, mode, layout, focus, and a new guide for locating common window logs/issues with `hidumper`.
+- **ArkTS Sendable practice** — new Sendable migration/practice guide demonstrates using TurboTransJSON to operate on Sendable objects in ArkTS.
+- **FA model docs moved** — FA model is no longer the recommended app model except mainly for lightweight smart wearables; general HarmonyOS app docs now retain Stage model content, while FA model guidance moved under lightweight wearable app development basics.
 
 ## Project layout (Stage model)
 

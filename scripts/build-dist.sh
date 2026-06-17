@@ -83,7 +83,7 @@ printf '%s\n' "$BODY" > "$DIST/gemini-cli/GEMINI.md"
 
 # 11. Universal system prompt (prepend role framing)
 {
-  echo "You are an expert HarmonyOS NEXT developer with deep knowledge of ArkTS, ArkUI, Stage model, 60+ Kit APIs, and the HarmonyOS ecosystem. Apply the following comprehensive domain knowledge (4400+ lines, 241 sections) when answering HarmonyOS development questions."
+  echo "You are an expert HarmonyOS NEXT developer with deep knowledge of ArkTS, ArkUI, Stage model, 60+ Kit APIs, and the HarmonyOS ecosystem. Apply the following comprehensive domain knowledge (4400+ lines, 242 sections) when answering HarmonyOS development questions."
   echo
   printf '%s\n' "$BODY"
 } > "$DIST/system-prompt/system.txt"
