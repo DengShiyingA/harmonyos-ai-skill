@@ -8,7 +8,7 @@
 
 ### The largest HarmonyOS knowledge pack for AI coding — make 11+ AI tools actually write ArkTS
 
-*4,435 lines of battle-tested knowledge · 242 sections · 105+ code examples · production baseline API 24, tracking HarmonyOS 7 / API 26 Beta1*
+*4,440 lines of battle-tested knowledge · 242 sections · 105+ code examples · production baseline API 24, tracking HarmonyOS 7 / API 26 Beta1*
 
 [![License](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
 [![HarmonyOS](https://img.shields.io/badge/HarmonyOS-6.1%20%2F%206.1.1-black)](https://developer.huawei.com/consumer/cn/)
@@ -117,7 +117,7 @@ A skill is a chunk of domain knowledge (in Markdown) that an AI coding tool load
 <img src="./assets/en/knowledge-map.svg" alt="Knowledge architecture" width="100%"/>
 </div>
 
-The skill teaches the AI everything needed to read, write, review, and debug HarmonyOS NEXT native apps (**4,435 lines of dense, actionable knowledge, 242 sections, 105+ code examples**):
+The skill teaches the AI everything needed to read, write, review, and debug HarmonyOS NEXT native apps (**4,440 lines of dense, actionable knowledge, 242 sections, 105+ code examples**):
 
 - **Language & framework** — ArkTS strictness rules, naming conventions, 13 high-performance coding rules (const, TypedArrays, HashMap, lazy import, etc.), coding style guide
 - **App architecture** — Stage model: UIAbility, ExtensionAbility, AbilityStage, WindowStage lifecycles; module.json5 / app.json5 configuration
