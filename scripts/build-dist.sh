@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# Build distribution files for multiple AI tools from the single source SKILL.md.
+# Build distribution files for multiple AI tools from the HarmonyOS skill package.
 # Run from repo root:  ./scripts/build-dist.sh
 set -euo pipefail
 
-SRC="harmonyos-development/SKILL.md"
+SKILL_DIR="harmonyos-development"
+SRC="$SKILL_DIR/SKILL.md"
 DIST="dist"
 
 if [[ ! -f "$SRC" ]]; then
@@ -17,10 +18,42 @@ BODY=$(awk '
   in_body { print }
 ' "$SRC")
 
+# Optional support files are kept for native skill runtimes and appended for single-file tools.
+SUPPORT_FILES=()
+for dir in references recipes examples; do
+  if [[ -d "$SKILL_DIR/$dir" ]]; then
+    while IFS= read -r file; do
+      SUPPORT_FILES+=("$file")
+    done < <(find "$SKILL_DIR/$dir" -type f | sort)
+  fi
+done
+
+build_combined_body() {
+  printf '%s\n' "$BODY"
+
+  if (( ${#SUPPORT_FILES[@]} > 0 )); then
+    echo
+    echo "---"
+    echo
+    echo "# Supporting Skill Files"
+    echo
+    echo "The following sections are generated from supporting files for AI tools that only accept a single instruction file. Native Agent Skill runtimes should use the directory version instead."
+
+    for file in "${SUPPORT_FILES[@]}"; do
+      echo
+      echo "---"
+      echo
+      echo "## $file"
+      echo
+      cat "$file"
+    done
+  fi
+}
+
 # Clean + recreate dist
 rm -rf "$DIST"
 mkdir -p \
-  "$DIST/claude-code/harmonyos-development" \
+  "$DIST/claude-code" \
   "$DIST/plain" \
   "$DIST/cursor" \
   "$DIST/copilot" \
@@ -31,23 +64,23 @@ mkdir -p \
   "$DIST/gemini-cli" \
   "$DIST/system-prompt"
 
-# 1. Claude Code native (original format, for reference / direct copy)
-cp "$SRC" "$DIST/claude-code/harmonyos-development/SKILL.md"
+# 1. Claude Code / native Agent Skill package: preserve SKILL.md plus supporting files.
+cp -R "$SKILL_DIR" "$DIST/claude-code/$SKILL_DIR"
+
+# Materialize combined body once for single-file rule systems.
+COMBINED_BODY="$(build_combined_body)"
 
 # 2. Plain Markdown - for ChatGPT / Gemini / DeepSeek / Qwen / Ollama custom instructions
-printf '%s\n' "$BODY" > "$DIST/plain/harmonyos-knowledge.md"
+printf '%s\n' "$COMBINED_BODY" > "$DIST/plain/harmonyos-knowledge.md"
 
 # 3. Cursor modern MDC rule (place in .cursor/rules/harmonyos.mdc)
 {
   cat <<'HDR'
 ---
 description: >
-  HarmonyOS NEXT development expert — ArkTS, ArkUI, Stage model, 60+ Kit APIs,
-  UI components (Tabs/Swiper/WaterFlow/Grid/List), state management (V1/V2/StateStore),
-  navigation, animation, networking, data persistence, Camera/Audio/AVPlayer/Image Kit,
-  Scan/Account/Payment/Push/Map/Share Kit, dark mode, immersive window, keyboard,
-  gestures, permissions, testing, code obfuscation, performance optimization,
-  third-party libraries (@ohos/axios, lottie, imageknife, pulltorefresh).
+  HarmonyOS NEXT development expert — ArkTS, ArkUI, Stage model, API 24 production baseline,
+  API 26 preview boundary, state management, Navigation, permissions, networking, data persistence,
+  build/sign/release, testing, and performance optimization.
 globs:
   - "**/*.ets"
   - "**/module.json5"
@@ -57,35 +90,35 @@ globs:
 alwaysApply: false
 ---
 HDR
-  printf '%s\n' "$BODY"
+  printf '%s\n' "$COMBINED_BODY"
 } > "$DIST/cursor/harmonyos.mdc"
 
 # 4. Cursor legacy single-file rules (.cursorrules at repo root)
-printf '%s\n' "$BODY" > "$DIST/cursor/.cursorrules"
+printf '%s\n' "$COMBINED_BODY" > "$DIST/cursor/.cursorrules"
 
 # 5. GitHub Copilot (place at .github/copilot-instructions.md)
-printf '%s\n' "$BODY" > "$DIST/copilot/copilot-instructions.md"
+printf '%s\n' "$COMBINED_BODY" > "$DIST/copilot/copilot-instructions.md"
 
 # 6. Continue.dev rule (place in .continue/rules/)
-printf '%s\n' "$BODY" > "$DIST/continue/harmonyos.md"
+printf '%s\n' "$COMBINED_BODY" > "$DIST/continue/harmonyos.md"
 
 # 7. Windsurf rules (.windsurfrules at repo root)
-printf '%s\n' "$BODY" > "$DIST/windsurf/.windsurfrules"
+printf '%s\n' "$COMBINED_BODY" > "$DIST/windsurf/.windsurfrules"
 
 # 8. Cline / Roo Code custom instructions
-printf '%s\n' "$BODY" > "$DIST/cline/custom-instructions.md"
+printf '%s\n' "$COMBINED_BODY" > "$DIST/cline/custom-instructions.md"
 
 # 9. AGENTS.md standard — used by OpenAI Codex CLI, sst/opencode, Amp, Aider, Cursor (read), etc.
-printf '%s\n' "$BODY" > "$DIST/agents-md/AGENTS.md"
+printf '%s\n' "$COMBINED_BODY" > "$DIST/agents-md/AGENTS.md"
 
 # 10. Google Gemini CLI (reads GEMINI.md at repo root or ~/.gemini/GEMINI.md globally)
-printf '%s\n' "$BODY" > "$DIST/gemini-cli/GEMINI.md"
+printf '%s\n' "$COMBINED_BODY" > "$DIST/gemini-cli/GEMINI.md"
 
 # 11. Universal system prompt (prepend role framing)
 {
-  echo "You are an expert HarmonyOS NEXT developer with deep knowledge of ArkTS, ArkUI, Stage model, 60+ Kit APIs, and the HarmonyOS ecosystem. Apply the following comprehensive domain knowledge (4400+ lines, 242 sections) when answering HarmonyOS development questions."
+  echo "You are an expert HarmonyOS NEXT developer with deep knowledge of ArkTS, ArkUI, Stage model, HarmonyOS Kit APIs, and the HarmonyOS ecosystem. Apply the following domain knowledge when answering HarmonyOS development questions."
   echo
-  printf '%s\n' "$BODY"
+  printf '%s\n' "$COMBINED_BODY"
 } > "$DIST/system-prompt/system.txt"
 
 echo "Built $(find "$DIST" -type f | wc -l | tr -d ' ') files:"
