@@ -1,0 +1,6 @@
+{
+  "bundleName": "com.example.app",
+  "moduleName": "entry",
+  "abilityName": "EntryAbility",
+  "appFilesRoot": "/data/storage/el2/base/haps/entry/files"
+}

@@ -2,6 +2,15 @@
 
 Use this reference when C/C++ code calls APIs newer than `compatibleSdkVersion`, or when a low-version device fails while loading a native library.
 
+## Official Source Lookup
+
+- Huawei Developer Docs: `https://developer.huawei.com/consumer/cn/doc/`
+- Direct compatibility reference: `https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/c-api-compatibility-warning`
+- Context7 Library IDs: `/websites/developer_huawei_consumer_cn_doc`, `/websites/developer_huawei_consumer_cn_doc_harmonyos-guides`, `/websites/developer_huawei_consumer_cn_doc_harmonyos-references`
+- Suggested query keywords: `C API compatibility warning, weak reference, APIAVAILABLE, compatibleSdkVersion, weak library, target_link_options`
+
+Context7 may not surface this release-note page for every query. Verify the direct official page and the headers/toolchain installed in the target project before changing compiler or linker settings.
+
 ## Core rule
 
 Starting with SDK API 22, HarmonyOS can use C API weak references together with `APIAVAILABLE` to keep one native codebase compatible across system versions. This is an advanced mechanism: missing link dependencies can still compile successfully and then crash at runtime.

@@ -10,25 +10,23 @@ cases:
       - "useState"
       - "React Hook"
 
-  - id: api24-production-default
+  - id: api26-production-default
     prompt: "帮我写一个生产可用的鸿蒙相机功能方案。"
     must_include:
-      - "API 24"
+      - "API 26"
       - "生产"
       - "module.json5"
     must_not_include:
-      - "默认使用 API 26"
       - "HarmonyOS 7 Beta 默认"
 
-  - id: api26-preview-boundary
+  - id: api24-compatibility-boundary
     prompt: "HarmonyOS 7 / API 26 适配要注意什么？"
     must_include:
-      - "预览"
-      - "Beta"
+      - "Release"
       - "API 26"
       - "适配"
     must_not_include:
-      - "API 24 默认使用 API 26"
+      - "API 26 仅是预览"
 
   - id: stage-model-new-app
     prompt: "新建鸿蒙应用应该用 FA 模型还是 Stage 模型？"
@@ -114,3 +112,12 @@ cases:
       - "断点"
     must_not_include:
       - "只能使用窗口断点"
+
+  - id: device-automation-routing
+    prompt: "请连接鸿蒙模拟器，启动应用，截图并导出当前页面布局树。"
+    must_include:
+      - "harmony-hdc-ui-automation"
+      - "HDC"
+      - "布局树"
+    must_not_include:
+      - "只读取 harmonyos-development"

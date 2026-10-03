@@ -1,6 +1,15 @@
 # HarmonyOS AI Development Tools
 
-Use this reference for DevEco Code, DevEco CLI, Agent Framework Kit, app Skills, Intents Kit, A2A, and HarmonyOS 7 AI-assisted development questions.
+Use this reference for DevEco Code, DevEco CLI, Agent Framework Kit, app Skills, Intents Kit, A2A, and HarmonyOS 7/API 26 AI-assisted development questions.
+
+## Official Source Lookup
+
+- Huawei Developer Docs: `https://developer.huawei.com/consumer/cn/doc/`
+- Use page-specific guide/reference URLs returned by official search or Context7; do not invent a documentation slug.
+- Context7 Library IDs: `/websites/developer_huawei_consumer_cn_doc`, `/websites/developer_huawei_consumer_cn_doc_harmonyos-guides`, `/websites/developer_huawei_consumer_cn_doc_harmonyos-references`
+- Suggested query keywords: `DevEco Code, DevEco CLI, CodeGenie, Agent Framework Kit, Intents Kit, app Skill, AgentCard, device-side A2A`
+
+Treat this file as a capability-routing snapshot. Verify current product names, installed CLI commands, SDK availability, and API signatures before answering.
 
 ## Tool selection
 
@@ -9,9 +18,10 @@ Use this reference for DevEco Code, DevEco CLI, Agent Framework Kit, app Skills,
 | Full IDE editing, preview, profiling, signing, emulator, and graphical debugging | DevEco Studio |
 | Agent-led HarmonyOS implementation and iterative build/run/verify/fix workflows | DevEco Code |
 | Scriptable project, build, check, device, and debugging actions for Agents or CI/CD | DevEco CLI |
+| IDE-integrated AI assistant/plugin workflow | CodeGenie |
 | General-purpose third-party coding Agent | Its native workflow plus DevEco CLI/Hvigor/HDC and this skill |
 
-DevEco Code is a HarmonyOS-focused coding Agent, while DevEco CLI is the execution layer designed for command-line automation and Agent invocation. Neither changes the production SDK baseline: use API 24 Release by default and API 26 Beta1 only for preview/adaptation work.
+DevEco Code is a HarmonyOS-focused coding Agent, DevEco CLI is the command-line execution layer for automation and Agent invocation, and CodeGenie remains an IDE-integrated assistant surface. The current production SDK baseline is API 26.0.0 Release; retain API 24 Release only when the application explicitly supports older devices.
 
 ## Agent capability boundaries
 
@@ -35,7 +45,7 @@ Do not use these names interchangeably. First identify whether the user needs UI
 ## Answer rules
 
 1. State whether the request is about DevEco Studio, DevEco Code, DevEco CLI, or a third-party Agent.
-2. Keep API 24 production guidance separate from API 26 Beta preview guidance.
+2. Keep API 26.0.0 Release guidance separate from API 24 compatibility guidance.
 3. Name the exact Agent capability layer instead of using generic terms such as "HarmonyOS Agent API."
 4. Do not invent DevEco CLI command names. Use installed-tool help or official documentation for exact commands and flags.
 5. For device-dependent capabilities such as LTPO or spatial audio, require SDK and hardware support verification.

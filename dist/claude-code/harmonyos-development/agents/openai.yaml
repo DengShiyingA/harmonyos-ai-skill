@@ -1,0 +1,4 @@
+interface:
+  display_name: "HarmonyOS Development"
+  short_description: "HarmonyOS NEXT、ArkTS、ArkUI 与系统能力开发指南"
+  default_prompt: "Use $harmonyos-development to implement or review a HarmonyOS NEXT feature with the correct ArkTS, ArkUI, SDK, permission, and project configuration patterns."

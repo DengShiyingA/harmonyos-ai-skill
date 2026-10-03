@@ -1,0 +1,4 @@
+interface:
+  display_name: "Harmony HDC UI Automation"
+  short_description: "HarmonyOS 真机 UI 控制、hilog 分析与沙箱文件传输"
+  default_prompt: "Use $harmony-hdc-ui-automation to inspect connected HarmonyOS devices, launch the app, capture the real UI, collect filtered hilog debug evidence, transfer app sandbox files, and run or design UI automation tests."

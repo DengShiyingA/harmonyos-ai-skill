@@ -18,7 +18,7 @@ Use this recipe when the user shares a DevEco Studio, Hvigor, ohpm, ArkTS, signi
    - target SDK
    - compatible SDK
    - Node.js version if relevant
-3. Check whether the answer must use API 24 production rules or API 26 preview rules.
+3. Check whether the answer must use API 26 Release rules or API 24 compatibility rules.
 4. Provide one minimal fix first.
 5. Provide a verification command or IDE action.
 

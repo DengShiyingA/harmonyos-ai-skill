@@ -24,4 +24,4 @@ Use this recipe when the user asks for code review, refactoring, migration revie
 
 - Generic React or Android advice.
 - Rewriting the whole file when a targeted fix is enough.
-- API 26-only recommendations for API 24 production code.
+- API 26-only recommendations for API 24 compatibility code.
