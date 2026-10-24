@@ -56,10 +56,10 @@ def main() -> None:
         fail("description is too long; keep discovery metadata concise")
     if "HarmonyOS" not in description or "ArkTS" not in description:
         fail("description should mention HarmonyOS and ArkTS for discovery")
-    if "API 26" in body and "preview" not in body.lower():
-        fail("API 26 must be marked as preview/Beta somewhere in SKILL.md")
-    if "API 24" not in body:
-        fail("SKILL.md must state API 24 production baseline")
+    if "API 26.0.0 Release" not in body:
+        fail("SKILL.md must state the API 26.0.0 Release baseline")
+    if "compatibleSdkVersion" not in body or "API 24" not in body:
+        fail("SKILL.md must explain compatibility with existing API 24 projects")
 
     print(f"OK: {path}")
 

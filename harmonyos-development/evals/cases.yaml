@@ -10,8 +10,8 @@ cases:
       - "useState"
       - "React Hook"
 
-  - id: api24-production-default
-    prompt: "帮我写一个生产可用的鸿蒙相机功能方案。"
+  - id: api24-existing-project
+    prompt: "现有生产相机工程 compile 和 target 都是 API 24，本次只修相机功能，不升级 SDK。"
     must_include:
       - "API 24"
       - "生产"
@@ -20,15 +20,15 @@ cases:
       - "默认使用 API 26"
       - "HarmonyOS 7 Beta 默认"
 
-  - id: api26-preview-boundary
-    prompt: "HarmonyOS 7 / API 26 适配要注意什么？"
+  - id: api26-release-migration
+    prompt: "新建 HarmonyOS 7 / API 26 生产工程，SDK 和旧设备兼容应该怎样选择？"
     must_include:
-      - "预览"
-      - "Beta"
-      - "API 26"
-      - "适配"
+      - "Release"
+      - "compatibleSdkVersion"
+      - "targetSdkVersion"
     must_not_include:
-      - "API 24 默认使用 API 26"
+      - "仅供预览"
+      - "API 26 只能用于 Beta"
 
   - id: stage-model-new-app
     prompt: "新建鸿蒙应用应该用 FA 模型还是 Stage 模型？"
@@ -114,3 +114,30 @@ cases:
       - "断点"
     must_not_include:
       - "只能使用窗口断点"
+
+  - id: napi-native-callback
+    prompt: "Native 传感器线程缓存主线程 env，直接 napi_call_function 偶发崩溃，页面退出也会崩，怎么修？"
+    must_include:
+      - "napi_threadsafe_function"
+      - "napi_queue_full"
+      - "生命周期"
+    must_not_include:
+      - "加锁后直接跨线程调用"
+
+  - id: napi-async-cancellation
+    prompt: "napi_async_work 取消返回成功，能否立即 delete context 并在 execute 中构造 napi_value？"
+    must_include:
+      - "execute"
+      - "complete"
+      - "napi_delete_async_work"
+    must_not_include:
+      - "取消成功立即释放 context"
+
+  - id: napi-retained-callback
+    prompt: "把 napi_value callback 存到全局，下次异步回调再用，如何修复并支持多个 Worker？"
+    must_include:
+      - "napi_ref"
+      - "napi_delete_reference"
+      - "环境"
+    must_not_include:
+      - "所有 Worker 共用一个 env"

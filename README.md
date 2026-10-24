@@ -8,7 +8,7 @@
 
 ### 鸿蒙最大的 AI 编程知识库 · 让 11+ AI 工具真正会写 ArkTS
 
-*4461 行实战知识 · 243 个章节 · 105+ 代码示例 · 生产覆盖 API 24，跟踪 HarmonyOS 7 / API 26 Beta1*
+*4475 行主知识文件 · 245 个章节 · 105+ 代码示例 · HarmonyOS 7 / API 26 Release，兼容现有 API 24 工程*
 
 [![License](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
 [![HarmonyOS](https://img.shields.io/badge/HarmonyOS-6.1%20%2F%206.1.1-black)](https://developer.huawei.com/consumer/cn/)
@@ -28,7 +28,7 @@
 **问 Copilot `@ObjectLink` 怎么用，它说"这 API 不存在"？**
 
 通用大模型从来没系统学过鸿蒙——它们的训练数据里几乎没有 ArkTS、Stage 模型、HarmonyOS Kit。
-所以我把华为官方文档、最佳实践、API 参考浓缩成一份**4461 行、可直接喂进 LLM 上下文**的知识包，从 ArkTS 严格语法到 60+ Kit、从液态玻璃到 AI super frame、从应用接续到 PersistenceV2，全都覆盖。
+所以我把华为官方文档、最佳实践、API 参考浓缩成一份**4475 行主文件与按需加载参考文档**组成的知识包，从 ArkTS 严格语法到 60+ Kit、从液态玻璃到 AI super frame、从应用接续到 PersistenceV2，全都覆盖。
 
 **一份 Markdown 源文件，自动产出 11+ AI 工具的配置。** 装上之后，AI 会像读过华为文档的工程师一样，给你符合鸿蒙规范的代码——而不是把 `@State` 写成 `useState`。
 
@@ -99,7 +99,7 @@ New-Item -ItemType SymbolicLink -Path $HOME\.claude\skills\harmonyos-development
 
 知识不在 AI 脑子里，得喂进去。**这就是这个仓库做的事。**
 
-只维护一份知识源文件 [`harmonyos-development/SKILL.md`](./harmonyos-development/SKILL.md)，即可自动产出所有 AI 工具的配置文件。
+维护 [`harmonyos-development/SKILL.md`](./harmonyos-development/SKILL.md) 和 `references/` 等配套资源，即可自动产出所有 AI 工具的配置文件。
 
 <details>
 <summary><b>🤔 什么是 "skill"（技能包）？</b>（点击展开）</summary>
@@ -109,7 +109,7 @@ Skill 是一段领域知识（Markdown 格式），AI 编程工具会在对话�
 </details>
 
 **依赖：** 只需 `git` 和 `curl`（或直接复制粘贴）。无其他依赖。
-**保鲜度：** 跟随官方版本节奏更新。生产基线覆盖到 HarmonyOS 6.1.1 Release (API 24)（2026/05/26），并跟踪 HarmonyOS 7 / 26.0.0 Beta1（API 26，2026/06/12）预览能力。
+**保鲜度：** 2026/10/24 核对官方资料。新工程使用 HarmonyOS 7 / API 26.0.0 Release 工具链；现有 API 24 工程保留原配置，最低兼容版本按设备覆盖选择。含 Release 迁移、DevEco 工具和 NDK/Node-API 规范。
 
 ## 知识包内容
 
@@ -117,7 +117,7 @@ Skill 是一段领域知识（Markdown 格式），AI 编程工具会在对话�
 <img src="./assets/knowledge-map.svg" alt="知识架构图" width="100%"/>
 </div>
 
-这份知识包教会 AI 读写、审查和调试 HarmonyOS NEXT 原生应用所需的一切（**4461 行密集、可操作的知识，243 个章节，105+ 代码示例**）：
+这份知识包覆盖 AI 读写、审查和调试 HarmonyOS NEXT 原生应用的常用场景（**4475 行主文件，245 个章节，105+ 代码示例**，另含专题参考）：
 
 - **语言与框架** — ArkTS 严格模式规则、命名规范、13 条高性能编码规则（const、TypedArray、HashMap、lazy import 等）、编码风格指南
 - **应用架构** — Stage 模型：UIAbility、ExtensionAbility、AbilityStage、WindowStage 生命周期；module.json5 / app.json5 配置
@@ -139,6 +139,7 @@ Skill 是一段领域知识（Markdown 格式），AI 编程工具会在对话�
 - **三方库** — @ohos/axios（HTTP 客户端）、@ohos/pulltorefresh（下拉刷新）、@ohos/lottie（JSON 动画）、@ohos/imageknife（图片缓存）、dayjs（日期处理）
 - **API 23 / 24 新特性** — Navigation 路由栈绑定、Menu anchorPosition、UDMF/drag/crypto C API、relationalStore sendable 增强、AI super frame、Camera Kit "Follow the Person" 主体追踪、延迟预览、DevEco Studio API 24 支持
 - **最新兼容与调测** — Native `APIAVAILABLE`/弱引用、Linux CI、`jsLeakWatcher`、HWASan、`ContainerReader` 容器断点、全局组件复用
+- **NDK/Node-API** — 环境和线程归属、TSFN 队列与退出清理、异步任务取消、句柄/引用生命周期、Native 库声明与 ABI 打包
 - **多设备** — 响应式断点（xs/sm/md/lg/xl）、GridRow/GridCol、折叠屏适配
 - **打包与工具** — HAP/HSP/HAR、原子化服务、DevEco Studio 6.1+（hvigor）、OHPM、ArkCompiler
 
@@ -525,7 +526,11 @@ harmonyos-ai-skill/
 ├─ LICENSE
 ├─ README_EN.md
 ├─ harmonyos-development/
-│  └─ SKILL.md                          ← 唯一的知识源文件，只编辑这里
+│  ├─ SKILL.md                          ← 入口与核心规则
+│  ├─ references/                       ← 按需加载的专题参考
+│  ├─ recipes/                          ← 调试与审查流程
+│  ├─ examples/                         ← 示例代码
+│  └─ evals/                            ← 评估场景
 ├─ scripts/
 │  └─ build-dist.sh                     ← 重新生成所有 dist/ 文件
 ├─ dist/                                ← 自动生成 —— 不要手动编辑
@@ -545,7 +550,7 @@ harmonyos-ai-skill/
 
 **单源工作流：**
 
-1. 编辑 `harmonyos-development/SKILL.md`
+1. 编辑 `harmonyos-development/SKILL.md` 和对应的专题参考或评估场景
 2. 运行 `./scripts/build-dist.sh`
 3. 同时提交源文件和重新生成的 `dist/`
 
@@ -624,7 +629,7 @@ URL 中的分支可能已变更。检查 `https://github.com/DengShiyingA/harmon
 
 欢迎贡献：
 1. Fork 本仓库
-2. 编辑 `harmonyos-development/SKILL.md`（**唯一**需要编辑的文件 —— `dist/` 是自动生成的）
+2. 编辑 `harmonyos-development/` 中对应的入口、参考或评估场景（`dist/` 是自动生成的）
 3. 运行 `./scripts/build-dist.sh` 重新生成配置文件
 4. 同时提交源文件和 `dist/`，然后开 PR
 

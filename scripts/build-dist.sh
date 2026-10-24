@@ -78,8 +78,8 @@ printf '%s\n' "$COMBINED_BODY" > "$DIST/plain/harmonyos-knowledge.md"
   cat <<'HDR'
 ---
 description: >
-  HarmonyOS NEXT development expert — ArkTS, ArkUI, Stage model, API 24 production baseline,
-  API 26 preview boundary, state management, Navigation, permissions, networking, data persistence,
+  HarmonyOS NEXT development expert — ArkTS, ArkUI, Stage model, API 26 Release,
+  API 24 compatibility, NDK/Node-API, state management, Navigation, permissions, networking, data persistence,
   build/sign/release, testing, and performance optimization.
 globs:
   - "**/*.ets"

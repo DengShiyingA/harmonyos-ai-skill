@@ -41,6 +41,15 @@ Do not claim a leak is fixed from one heap snapshot. Reproduce the lifecycle, fo
 
 Official reference: https://developer.huawei.com/consumer/cn/doc/best-practices/bpta-stability-memleak-detection-overview
 
+## API 26 Release tools
+
+- Native Leaks marks native leak locations; correlate with allocation stacks and repeat the same reproduction after fixing ownership.
+- ArkTS Snapshot dominator chains identify the owner retaining an object. Matched `.jsleaklist` and `.rawheap` imports connect leak lists with heap analysis.
+- FileSystem analysis correlates logical/physical I/O latency with app work.
+- For AppFreeze stacks involving ArkWeb, distinguish GPU-process stalls from Render-process stalls before changing ArkTS UI code.
+
+Sources: [Release tooling](https://developer.huawei.com/consumer/en/doc/harmonyos-releases/deveco-studio-new-features-2600), [ArkWeb diagnostic guides](https://developer.huawei.com/consumer/cn/monthly/202609).
+
 ## Output rule
 
 Give prioritized fixes: quick wins first, then structural changes, then SDK/tooling checks.

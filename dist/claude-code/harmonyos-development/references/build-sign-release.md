@@ -5,7 +5,7 @@ Use this reference for DevEco Studio builds, Hvigor, ohpm, HAP/HAR/HSP packaging
 ## Defaults
 
 - Confirm the production baseline before suggesting SDK or toolchain changes.
-- API 24 Release is the default production target unless the user explicitly targets API 26 preview.
+- Use the project's configured SDK baseline; new-project guidance uses API 26.0.0 Release. See `platform-baseline.md` for the matched toolchain and minimum-device policy.
 - Keep generated `dist/` output separate from source skill files.
 
 ## Build debugging checklist
@@ -88,6 +88,8 @@ hdc shell rm -f data/local/tmp/entry-signed.hap
 When multiple devices are connected, select the target explicitly. Capture HiLog and make the pipeline fail when installation, launch, or the smoke test fails.
 
 ## Packaging notes
+
+DevEco Studio 26.0.0 Release adds `packOptions.deduplicateSo` in project `build-profile.json5` to remove duplicate SOs from app bundles, standalone merged bytecode HAR packaging, and dependencies selected by target/product/buildMode. Check the installed schema and test the packaged native libraries on each supported ABI before enabling these options.
 
 | Package | Use |
 |---|---|

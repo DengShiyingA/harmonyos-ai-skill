@@ -5,7 +5,8 @@ python3 scripts/check-frontmatter.py harmonyos-development/SKILL.md
 
 test -f harmonyos-development/references/README.md
 test -f harmonyos-development/references/platform-baseline.md
-test -f harmonyos-development/references/api26-preview.md
+test -f harmonyos-development/references/api26-release.md
+test -f harmonyos-development/references/ndk-napi.md
 test -f harmonyos-development/references/ai-development-tools.md
 test -f harmonyos-development/references/native-api-compatibility.md
 test -f harmonyos-development/references/arkts-rules.md

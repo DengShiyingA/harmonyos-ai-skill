@@ -19,7 +19,7 @@ Do not treat any one of these as sufficient by itself:
 1. Use matching DevEco Studio and SDK versions.
 2. Pass `compatibleSdkVersion` to the compiler to enable availability checks.
 3. Link every library that provides a referenced API.
-4. If the providing dynamic library does not exist on older devices, configure it as a weak library as well as a link dependency.
+4. If the providing dynamic library does not exist on older devices, check the loader's weak-library support before using a weak library and link dependency.
 5. Wrap every newer API call with `APIAVAILABLE` and provide a fallback.
 6. Test both the oldest compatible device and a device that supports the new API.
 
@@ -39,7 +39,9 @@ Use the exact configuration shape generated or documented for the installed DevE
 
 ## Link behavior
 
-If the providing library exists on the old device, add it to `target_link_libraries`. If the library itself is absent on the old device, also mark it as weak:
+If the providing library exists on the old device, add it to `target_link_libraries`. If the library itself is absent, weak-library loading requires API 22+ runtime support. Do not assume the example below handles an absent library on API 20/21; isolate that dependency and use a supported optional-loading/fallback design for those devices.
+
+For supported runtimes, mark an absent library as weak as well as linking it:
 
 ```cmake
 target_link_libraries(entry PUBLIC libohi18n.so)

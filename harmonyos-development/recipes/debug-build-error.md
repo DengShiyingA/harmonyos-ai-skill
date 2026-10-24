@@ -18,7 +18,7 @@ Use this recipe when the user shares a DevEco Studio, Hvigor, ohpm, ArkTS, signi
    - target SDK
    - compatible SDK
    - Node.js version if relevant
-3. Check whether the answer must use API 24 production rules or API 26 preview rules.
+3. Read the project's SDK configuration; distinguish an existing API 24 project from an API 26 Release upgrade. For Native/Node-API errors read `../references/ndk-napi.md` and `../references/native-api-compatibility.md`.
 4. Provide one minimal fix first.
 5. Provide a verification command or IDE action.
 

@@ -8,7 +8,7 @@
 
 ### The largest HarmonyOS knowledge pack for AI coding — make 11+ AI tools actually write ArkTS
 
-*4,461 lines of battle-tested knowledge · 243 sections · 105+ code examples · production baseline API 24, tracking HarmonyOS 7 / API 26 Beta1*
+*4,475-line entrypoint · 245 sections · 105+ code examples · HarmonyOS 7 / API 26 Release, compatible with existing API 24 projects*
 
 [![License](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
 [![HarmonyOS](https://img.shields.io/badge/HarmonyOS-6.1%20%2F%206.1.1-black)](https://developer.huawei.com/consumer/cn/)
@@ -28,7 +28,7 @@
 **Ask Copilot about `@ObjectLink` — it says "that API doesn't exist."**
 
 General-purpose LLMs have never systematically learned HarmonyOS — their training data barely contains ArkTS, the Stage model, or HarmonyOS Kits.
-So I distilled the entire Huawei official documentation, best practices, and API reference into a **4,425-line knowledge pack you drop straight into the LLM's context**: ArkTS strict-mode syntax, all 60+ Kits, glassmorphism effects, AI super frame, app continuation, PersistenceV2 — it's all in here.
+So I distilled Huawei official documentation, best practices, and API references into a **4,475-line entrypoint with focused supporting references**: ArkTS strict-mode syntax, 60+ Kits, glassmorphism effects, AI super frame, app continuation, and PersistenceV2.
 
 **One Markdown source → drop-in configs for 11+ AI tools.** Once installed, your AI writes HarmonyOS-correct code like an engineer who's actually read the docs — instead of turning `@State` into `useState`.
 
@@ -109,7 +109,7 @@ A skill is a chunk of domain knowledge (in Markdown) that an AI coding tool load
 </details>
 
 **Requirements:** `git` and `curl` (or just copy-paste for web tools). No other dependencies.
-**Freshness:** Tracks official release cadence. Production baseline covers HarmonyOS 6.1.1 Release (API 24), released 2026-05-26, and tracks HarmonyOS 7 / 26.0.0 Beta1 (API 26), released 2026-06-12, for preview adaptation.
+**Freshness:** Verified against official sources on 2026-10-24. New projects use HarmonyOS 7 / API 26.0.0 Release tools; existing API 24 projects retain their settings, with minimum compatibility chosen from device coverage. Includes Release migration, DevEco tools, and NDK/Node-API rules.
 
 ## What's inside the knowledge
 
@@ -117,7 +117,7 @@ A skill is a chunk of domain knowledge (in Markdown) that an AI coding tool load
 <img src="./assets/en/knowledge-map.svg" alt="Knowledge architecture" width="100%"/>
 </div>
 
-The skill teaches the AI everything needed to read, write, review, and debug HarmonyOS NEXT native apps (**4,461 lines of dense, actionable knowledge, 243 sections, 105+ code examples**):
+The skill covers common HarmonyOS NEXT implementation, review, and debugging scenarios (**4,475-line entrypoint, 245 sections, 105+ code examples**, plus supporting references):
 
 - **Language & framework** — ArkTS strictness rules, naming conventions, 13 high-performance coding rules (const, TypedArrays, HashMap, lazy import, etc.), coding style guide
 - **App architecture** — Stage model: UIAbility, ExtensionAbility, AbilityStage, WindowStage lifecycles; module.json5 / app.json5 configuration
@@ -139,6 +139,7 @@ The skill teaches the AI everything needed to read, write, review, and debug Har
 - **Third-party libraries** — @ohos/axios (HTTP client), @ohos/pulltorefresh, @ohos/lottie (JSON animation), @ohos/imageknife (image caching), dayjs (date utils)
 - **API 23 / 24 new features** — Navigation routing stack binding, Menu anchorPosition, UDMF/drag/crypto C APIs, relationalStore sendable enhancement, AI super frame, Camera Kit "Follow the Person" subject tracking, delayed preview, DevEco Studio API 24 support
 - **Current compatibility & diagnostics** — Native `APIAVAILABLE`/weak references, Linux CI, `jsLeakWatcher`, HWASan, `ContainerReader` breakpoints, and global component reuse
+- **NDK/Node-API** — environment/thread ownership, TSFN queue and teardown, async cancellation, handle/reference lifetimes, Native declarations, and ABI packaging
 - **Multi-device** — responsive breakpoints (xs/sm/md/lg/xl), GridRow/GridCol, foldable support
 - **Packaging & tooling** — HAP/HSP/HAR, atomic services, DevEco Studio 6.1+ (hvigor), OHPM, ArkCompiler
 
@@ -526,7 +527,11 @@ harmonyos-ai-skill/
 ├─ LICENSE
 ├─ README_EN.md
 ├─ harmonyos-development/
-│  └─ SKILL.md                          ← Source of truth. Edit only here.
+│  ├─ SKILL.md                          ← Entrypoint and core rules
+│  ├─ references/                       ← Focused supporting references
+│  ├─ recipes/                          ← Debugging and review workflows
+│  ├─ examples/                         ← Code examples
+│  └─ evals/                            ← Evaluation scenarios
 ├─ scripts/
 │  └─ build-dist.sh                     ← Regenerates every dist/ file
 ├─ dist/                                ← Generated — do not edit by hand
@@ -546,7 +551,7 @@ harmonyos-ai-skill/
 
 **Single-source workflow:**
 
-1. Edit `harmonyos-development/SKILL.md`
+1. Edit `harmonyos-development/SKILL.md` and the relevant reference or evaluation scenarios
 2. Run `./scripts/build-dist.sh`
 3. Commit both the source and the regenerated `dist/`
 
@@ -625,7 +630,7 @@ Licensed under the **MIT License** — use it freely in personal and commercial 
 
 Contributions welcome:
 1. Fork the repo
-2. Edit `harmonyos-development/SKILL.md` (the **only** file you should ever edit — `dist/` is generated)
+2. Edit the relevant entrypoint, reference, or evaluation in `harmonyos-development/` (`dist/` is generated)
 3. Run `./scripts/build-dist.sh` to regenerate distribution files
 4. Commit both the source and the regenerated `dist/`, then open a PR
 
