@@ -11,7 +11,7 @@
 *4,475-line entrypoint · 245 sections · 105+ code examples · HarmonyOS 7 / API 26 Release, compatible with existing API 24 projects*
 
 [![License](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
-[![HarmonyOS](https://img.shields.io/badge/HarmonyOS-6.1%20%2F%206.1.1-black)](https://developer.huawei.com/consumer/cn/)
+[![HarmonyOS](https://img.shields.io/badge/HarmonyOS-7%20%2F%20API%2026%20Release-black)](https://developer.huawei.com/consumer/cn/)
 [![ArkTS](https://img.shields.io/badge/ArkTS-API%2022--26-blue)](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides-V5/arkts-get-started-V5)
 [![Kits](https://img.shields.io/badge/Kits-60+-orange)](#whats-inside-the-knowledge)
 [![AI Tools](https://img.shields.io/badge/AI_Tools-11+-purple)](#supported-ai-tools)
@@ -30,7 +30,7 @@
 General-purpose LLMs have never systematically learned HarmonyOS — their training data barely contains ArkTS, the Stage model, or HarmonyOS Kits.
 So I distilled Huawei official documentation, best practices, and API references into a **4,475-line entrypoint with focused supporting references**: ArkTS strict-mode syntax, 60+ Kits, glassmorphism effects, AI super frame, app continuation, and PersistenceV2.
 
-**One Markdown source → drop-in configs for 11+ AI tools.** Once installed, your AI writes HarmonyOS-correct code like an engineer who's actually read the docs — instead of turning `@State` into `useState`.
+**One Markdown skill package generates configs for 11+ AI tools.** Native skill runtimes load references as needed; single-file tools use generated versions containing the supporting references.
 
 <br/>
 
@@ -99,7 +99,7 @@ Using a different tool (Cursor / Copilot / ChatGPT...)? See [all install options
 
 The knowledge isn't in the AI's head — you have to feed it in. **That's what this repo does.**
 
-Write the knowledge once — [`harmonyos-development/SKILL.md`](./harmonyos-development/SKILL.md) — and install it into every major AI coding tool via pre-built drop-in files.
+Maintain [`harmonyos-development/SKILL.md`](./harmonyos-development/SKILL.md) and its supporting resources, then install the generated package for your AI coding tool.
 
 <details>
 <summary><b>🤔 What is a "skill"?</b> (click to expand)</summary>
@@ -110,6 +110,8 @@ A skill is a chunk of domain knowledge (in Markdown) that an AI coding tool load
 
 **Requirements:** `git` and `curl` (or just copy-paste for web tools). No other dependencies.
 **Freshness:** Verified against official sources on 2026-10-24. New projects use HarmonyOS 7 / API 26.0.0 Release tools; existing API 24 projects retain their settings, with minimum compatibility chosen from device coverage. Includes Release migration, DevEco tools, and NDK/Node-API rules.
+
+References: [SDK and toolchain](./harmonyos-development/references/platform-baseline.md) · [API 26 Release migration](./harmonyos-development/references/api26-release.md) · [NDK/Node-API rules](./harmonyos-development/references/ndk-napi.md) · [Native API compatibility](./harmonyos-development/references/native-api-compatibility.md) · [All references](./harmonyos-development/references/README.md)
 
 ## What's inside the knowledge
 
@@ -208,9 +210,10 @@ mkdir -p ~/.claude/skills
 ln -s ~/src/harmonyos-ai-skill/harmonyos-development ~/.claude/skills/harmonyos-development
 
 # Option C — project-local only (commit it so your whole team gets the skill)
+git clone https://github.com/DengShiyingA/harmonyos-ai-skill.git ~/src/harmonyos-ai-skill
 cd <your-harmonyos-project-root>
-mkdir -p .claude/skills/harmonyos-development
-curl -o .claude/skills/harmonyos-development/SKILL.md "$RAW/harmonyos-development/SKILL.md"
+mkdir -p .claude/skills
+cp -R ~/src/harmonyos-ai-skill/harmonyos-development .claude/skills/
 ```
 
 After installing, **restart Claude Code**. To verify, ask it: *"What skills are available?"* — it should list `harmonyos-development`.
@@ -614,7 +617,7 @@ After editing the source file, run `./scripts/build-dist.sh` to regenerate every
 - For paste-based tools (ChatGPT, DeepSeek, …), the system prompt is per-conversation; start a **new chat** after pasting.
 
 **Rule file is too long for the tool's context limit.**
-Unlikely — `SKILL.md` is ~4400 lines (~150 KB). All major AI tools (Claude/GPT-4/Gemini etc.) accept it. If you hit a limit (e.g. some local small models), trim sections from `dist/plain/harmonyos-knowledge.md` manually.
+The entrypoint has 4,475 lines; single-file distributions also include supporting references and use more context. Prefer the complete native skill directory with references loaded as needed. For tools limited to one file, trim irrelevant sections to fit the actual input limit. Keep `references/`, `recipes/`, and `examples/` when installing the native package.
 
 **`curl` fails with 404.**
 The branch in the URL may have moved. Check `https://github.com/DengShiyingA/harmonyos-ai-skill/branches` and update `$RAW` accordingly.

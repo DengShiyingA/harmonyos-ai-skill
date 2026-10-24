@@ -11,7 +11,7 @@
 *4475 行主知识文件 · 245 个章节 · 105+ 代码示例 · HarmonyOS 7 / API 26 Release，兼容现有 API 24 工程*
 
 [![License](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
-[![HarmonyOS](https://img.shields.io/badge/HarmonyOS-6.1%20%2F%206.1.1-black)](https://developer.huawei.com/consumer/cn/)
+[![HarmonyOS](https://img.shields.io/badge/HarmonyOS-7%20%2F%20API%2026%20Release-black)](https://developer.huawei.com/consumer/cn/)
 [![ArkTS](https://img.shields.io/badge/ArkTS-API%2022--26-blue)](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides-V5/arkts-get-started-V5)
 [![Kits](https://img.shields.io/badge/Kits-60+-orange)](#知识包内容)
 [![AI Tools](https://img.shields.io/badge/AI_Tools-11+-purple)](#支持的-ai-工具)
@@ -30,7 +30,7 @@
 通用大模型从来没系统学过鸿蒙——它们的训练数据里几乎没有 ArkTS、Stage 模型、HarmonyOS Kit。
 所以我把华为官方文档、最佳实践、API 参考浓缩成一份**4475 行主文件与按需加载参考文档**组成的知识包，从 ArkTS 严格语法到 60+ Kit、从液态玻璃到 AI super frame、从应用接续到 PersistenceV2，全都覆盖。
 
-**一份 Markdown 源文件，自动产出 11+ AI 工具的配置。** 装上之后，AI 会像读过华为文档的工程师一样，给你符合鸿蒙规范的代码——而不是把 `@State` 写成 `useState`。
+**一套 Markdown 知识包，自动产出 11+ AI 工具的配置。** 原生 Skill 按需加载参考文件；单文件工具使用包含配套参考的生成版本。
 
 <br/>
 
@@ -110,6 +110,8 @@ Skill 是一段领域知识（Markdown 格式），AI 编程工具会在对话�
 
 **依赖：** 只需 `git` 和 `curl`（或直接复制粘贴）。无其他依赖。
 **保鲜度：** 2026/10/24 核对官方资料。新工程使用 HarmonyOS 7 / API 26.0.0 Release 工具链；现有 API 24 工程保留原配置，最低兼容版本按设备覆盖选择。含 Release 迁移、DevEco 工具和 NDK/Node-API 规范。
+
+专题入口：[版本与工具链](./harmonyos-development/references/platform-baseline.md) · [API 26 Release 迁移](./harmonyos-development/references/api26-release.md) · [NDK/Node-API 规范](./harmonyos-development/references/ndk-napi.md) · [Native API 兼容](./harmonyos-development/references/native-api-compatibility.md) · [全部参考](./harmonyos-development/references/README.md)
 
 ## 知识包内容
 
@@ -208,9 +210,10 @@ mkdir -p ~/.claude/skills
 ln -s ~/src/harmonyos-ai-skill/harmonyos-development ~/.claude/skills/harmonyos-development
 
 # 方式 C — 仅项目级别（提交到你的鸿蒙项目，团队成员开箱即用）
+git clone https://github.com/DengShiyingA/harmonyos-ai-skill.git ~/src/harmonyos-ai-skill
 cd <你的鸿蒙项目根目录>
-mkdir -p .claude/skills/harmonyos-development
-curl -o .claude/skills/harmonyos-development/SKILL.md "$RAW/harmonyos-development/SKILL.md"
+mkdir -p .claude/skills
+cp -R ~/src/harmonyos-ai-skill/harmonyos-development .claude/skills/
 ```
 
 安装后**重启 Claude Code**。验证方法：问 *"What skills are available?"* —— 应该列出 `harmonyos-development`。
@@ -613,7 +616,7 @@ description: >
 - 粘贴类工具（ChatGPT、DeepSeek 等）：系统提示是按对话生效的，粘贴后要**开新对话**
 
 **规则文件太长，超出工具的上下文限制？**
-不太可能 —— `SKILL.md` 约 4200 行（~150 KB），主流 AI 工具（Claude/GPT-4/Gemini 等）都能接受。如果确实遇到限制（如部分本地小模型），手动裁剪 `dist/plain/harmonyos-knowledge.md`。
+主文件为 4475 行，单文件分发版本还包含专题参考，实际上下文占用更大。优先使用完整目录形式的原生 Skill，按需读取参考文件；只能接收单文件的工具，请根据其输入限制裁剪无关章节。安装目录时保留 `references/`、`recipes/` 和 `examples/`。
 
 **`curl` 返回 404？**
 URL 中的分支可能已变更。检查 `https://github.com/DengShiyingA/harmonyos-ai-skill/branches` 并更新 `$RAW`。
